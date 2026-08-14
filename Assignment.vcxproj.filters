@@ -18,5 +18,11 @@
     <ClCompile Include="Appointment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Testing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NewFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
