@@ -6,10 +6,10 @@ using namespace std;
 void logo() {
 	cout << R"(                                                                                                                                                                             
 ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####  
-                                                                         
+																		 
 ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####  
-                                                                         
-                                                                         
+																		 
+																		 
  ######    ######       ######     ###    ##        #######  ##    ##    
 ##    ##  ##    ##     ##    ##   ## ##   ##       ##     ## ###   ##    
 ##        ##           ##        ##   ##  ##       ##     ## ####  ##    
@@ -17,12 +17,12 @@ void logo() {
 ##    ##  ##    ##           ## ######### ##       ##     ## ##  ####    
 ##    ##  ##    ##     ##    ## ##     ## ##       ##     ## ##   ###    
  ######    ######       ######  ##     ## ########  #######  ##    ##    
-                                                                         
-                                                                         
+																		 
+																		 
 ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####  
-                                                                         
+																		 
 ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####        
-                                                                         )" << endl;
+																		 )" << endl;
 }
 
 // Menu
@@ -44,6 +44,7 @@ struct Timeslot {
 	string time;
 	bool isBooked;
 	string staffName;
+	string service;
 };
 
 //timeslot
@@ -54,14 +55,15 @@ void displayAppointment(const Timeslot schedule[], int size) {
 	const string GREEN = "\033[32m";
 
 	//separator
-	string separator = "+" + string(5, '-') + "+" + string(21, '-') + "+" + string(11, '-') + "+" + string(17, '-') + "+";
+	string separator = "+" + string(5, '-') + "+" + string(21, '-') + "+" + string(11, '-') + "+" + string(17, '-') + "+" + string(19, '-') + "+";
 
 	//header
 	cout << separator << endl;
 	cout << "| " << left << setw(4) << "ID"
 		<< "| " << setw(20) << "Time Slot"
 		<< "| " << setw(10) << "Status"
-		<< "| " << setw(16) << "Staff" << "|" << endl;
+		<< "| " << setw(16) << "Staff"
+		<< "| " << setw(18) << "Service" << "|" << endl;
 	cout << separator << endl;
 
 	//details
@@ -69,11 +71,13 @@ void displayAppointment(const Timeslot schedule[], int size) {
 		string statusAppointment = schedule[i].isBooked ? "Booked" : "Available";
 		string statuscolor = schedule[i].isBooked ? RED : GREEN;
 		string staffname = schedule[i].isBooked ? schedule[i].staffName : "-";
+		string service = schedule[i].isBooked && !schedule[i].service.empty() ? schedule[i].service : "-";
 
 		cout << "| " << left << setw(4) << schedule[i].id
 			 << "| " << setw(20) << schedule[i].time
 			 << "| " << statuscolor << setw(10) << statusAppointment << RESET
-			 << "| " << setw(16) << staffname << "|" << endl;
+			 << "| " << setw(16) << staffname
+			 << "| " << setw(18) << service << "|" << endl;
 	}
 	cout << separator << endl;
 }
@@ -86,15 +90,15 @@ int main() {
 	//details
 	Timeslot schedule[TOTAL_SLOTS] = {
 		{1, "09:00 AM - 10:00 AM", false, ""},
-		{2, "10:00 AM - 11:00 AM", true,  "John Tan"},
+		{2, "10:00 AM - 11:00 AM", true,  "John Tan", "Haircut"},
 		{3, "11:00 AM - 12:00 PM", false, ""},
-		{4, "01:00 PM - 02:00 PM", true,  "Alice Lim"},
+		{4, "01:00 PM - 02:00 PM", true,  "Alice Lim", "Makeup"},
 		{5, "02:00 PM - 03:00 PM", false, ""},
 		{6, "03:00 PM - 04:00 PM", false, ""},
 		{7, "04:00 PM - 05:00 PM", false, ""}
 	};
 
-	int option;
+	int option, Appointment_time;
 
 	//looping menu
 	do
@@ -106,6 +110,16 @@ int main() {
 	// Get user input
 	cin >> option;
 
+	//validation for number input not char
+	if (cin.fail()) {
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+		cout << "Invalid input! Please enter a number from 1 to " << TOTAL_SLOTS << '.' << endl;
+		cout << "\nPress Enter to return to the menu...";
+		cin.get();
+		continue;
+	}
+
 		switch (option) {
 		case 1:
 			cout << "You selected: View All Appointment" << endl;
@@ -113,6 +127,12 @@ int main() {
 			break;
 		case 2:
 			cout << "You selected: Create a New Appointment" << endl;
+			displayAppointment(schedule, TOTAL_SLOTS);
+			cout << "Which timeslot do you prefer?" << endl;
+			cin >> Appointment_time;
+			
+			 
+
 			break;
 		case 3:
 			cout << "You selected: Cancel Appointment" << endl;
@@ -142,7 +162,7 @@ int main() {
 
 	} while (option != 7);
 
-    return 0;
+	return 0;
 }
 
 
