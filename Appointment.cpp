@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <string>
 using namespace std;
 
 // Logo
@@ -35,7 +36,7 @@ void menu() {
 	cout << "4. Reschedule Appointment" << endl;
 	cout << "5. View Staff Schedule" << endl;
 	cout << "6. Appointment Marking" << endl;
-	cout << "7. Exit\n" << endl;
+	cout << "0. Exit\n" << endl;
 }
 
 //define timeslot set
@@ -125,15 +126,40 @@ int main() {
 			cout << "You selected: View All Appointment" << endl;
 			displayAppointment(schedule, TOTAL_SLOTS);
 			break;
-		case 2:
+		case 2: {
 			cout << "You selected: Create a New Appointment" << endl;
 			displayAppointment(schedule, TOTAL_SLOTS);
 			cout << "Which timeslot do you prefer?" << endl;
 			cin >> Appointment_time;
-			
-			 
+
+			//check user input
+			if (cin.fail() || Appointment_time < 1 || Appointment_time > TOTAL_SLOTS) {
+				cin.clear();
+				cout << "\n[Error] Invalid timeslot ID! Please choose between 1 and " << TOTAL_SLOTS << "." << endl;
+				break;
+			}
+
+			int slotIndex = Appointment_time - 1;
+
+			if (schedule[slotIndex].isBooked) {
+				cout << "\n[Sorry] Timeslot " << Appointment_time << " is already booked!" << endl;
+			}
+			else {
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+				cout << "Enter Staff Name: ";
+				getline(cin, schedule[slotIndex].staffName);
+
+				cout << "Enter Service Name: ";
+				getline(cin, schedule[slotIndex].service);
+
+				schedule[slotIndex].isBooked = true;
+
+				cout << "\n[Success] Appointment successfully created for Timeslot " << Appointment_time << "!" << endl;
+			}
 
 			break;
+		}
 		case 3:
 			cout << "You selected: Cancel Appointment" << endl;
 			break;
@@ -146,7 +172,7 @@ int main() {
 		case 6:
 			cout << "You selected: Appoinment Marking" << endl;
 			break;
-		case 7:
+		case 0:
 			cout << "Exiting the program. Goodbye!" << endl;
 			break;
 		default:
@@ -154,13 +180,13 @@ int main() {
 			break;
 		}
 		//check option and stop the progress to show menu details, clear the number the looping before
-		if (option != 7) {
+		if (option != 0) {
 			cout << "\nPress Enter to return to the menu...";
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cin.get();
 		}
 
-	} while (option != 7);
+	} while (option != 0);
 
 	return 0;
 }
