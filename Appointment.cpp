@@ -3,6 +3,10 @@
 #include <string>
 using namespace std;
 
+const string RESET = "\033[0m";
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+
 // Logo
 void logo() {
 	cout << R"(                                                                                                                                                                             
@@ -51,9 +55,7 @@ struct Timeslot {
 //timeslot
 void displayAppointment(const Timeslot schedule[], int size) {
 
-	const string RESET = "\033[0m";
-	const string RED = "\033[31m";
-	const string GREEN = "\033[32m";
+	
 
 	//separator
 	string separator = "+" + string(5, '-') + "+" + string(21, '-') + "+" + string(11, '-') + "+" + string(17, '-') + "+" + string(19, '-') + "+";
@@ -135,27 +137,50 @@ int main() {
 			//check user input
 			if (cin.fail() || Appointment_time < 1 || Appointment_time > TOTAL_SLOTS) {
 				cin.clear();
-				cout << "\n[Error] Invalid timeslot ID! Please choose between 1 and " << TOTAL_SLOTS << "." << endl;
+				cout << RED << "\n[Error] Invalid timeslot ID! Please choose between 1 and " << TOTAL_SLOTS << "." << RESET << endl;
 				break;
 			}
 
 			int slotIndex = Appointment_time - 1;
+			int staffoption, Appointmentoption;
 
 			if (schedule[slotIndex].isBooked) {
-				cout << "\n[Sorry] Timeslot " << Appointment_time << " is already booked!" << endl;
+				cout << RED << "\n[Sorry] Timeslot " << Appointment_time << " is already booked!" << RESET << endl;
 			}
 			else {
 				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-				cout << "Enter Staff Name: ";
-				getline(cin, schedule[slotIndex].staffName);
+				cout << "Select a Staff you preferred";
+				cin >> staffoption;
+				switch (staffoption) {
+					case 1:
+						schedule[slotIndex].staffName = "Name";
+						break;
 
-				cout << "Enter Service Name: ";
-				getline(cin, schedule[slotIndex].service);
+
+				}
+
+				cout << "Enter a Service\n" << endl;
+				cout << "Please select an option from the menu below:" << endl;
+				cout << "1. Wedding Event" << endl;
+				cout << "2. Hair dressing with make up" << endl;
+				cin >> Appointmentoption;
+
+				switch (Appointmentoption) {
+					case 1:
+						schedule[slotIndex].service = "Wedding Event";
+						break;
+					case 2:
+						schedule[slotIndex].service = "Hair dressing with make up";
+						break;
+					default:
+						cout << "Invalid option. Please select a valid option from the menu." << endl;
+
+				}
 
 				schedule[slotIndex].isBooked = true;
 
-				cout << "\n[Success] Appointment successfully created for Timeslot " << Appointment_time << "!" << endl;
+				cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[slotIndex].time << "!" << RESET << endl;
 			}
 
 			break;
