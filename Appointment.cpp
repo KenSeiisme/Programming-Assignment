@@ -148,6 +148,8 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
 void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
 void CreateAppointmentStaff();
 void CreateAppointmentCustomer(const string& customerID, const string& customerName);
+void CancelAppointment(const string& currentUserId = "");
+void RescheduleAppointment(const string& currentUserId = "");
 void initMonthlySchedule();
 
 int main() {
@@ -1289,9 +1291,11 @@ void AppointmentStaff() {
         }
         case 3:
             cout << "You selected: Cancel Appointment" << endl;
+            CancelAppointment();
             break;
         case 4:
             cout << "You selected: Reschedule Appointment" << endl;
+            RescheduleAppointment();
             break;
         case 5:
             cout << "You selected: View Staff Schedule" << endl;
@@ -1350,10 +1354,12 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
         }
         case 2: {
             cout << "You selected: Cancel Appointment" << endl;
+            CancelAppointment(currentUserId);
             break;
         }
         case 3:
             cout << "You selected: Reschedule Appointment" << endl;
+            RescheduleAppointment(currentUserId);
             break;
         default:
             cout << "Invalid option. Please select a valid option from the menu." << endl;
@@ -1485,6 +1491,11 @@ string generateAppointmentID() {
 }
 
 void CreateAppointmentStaff() {
+
+    cout << "\n==========================================" << endl;
+    cout << "           CREATE APPOINTMENT             " << endl;
+    cout << "==========================================\n" << endl;
+
     string customerID;
     string customerName;
 
@@ -1529,7 +1540,7 @@ void CreateAppointmentStaff() {
         return;
     }
 
-    //check day must > right now
+    //pass day cant book
     if (dayOption < curDay) {
         cout << RED << "\n[Error] Cannot book appointments for past dates!" << RESET << endl;
         return;
@@ -1541,7 +1552,7 @@ void CreateAppointmentStaff() {
 
     //input time
     int Appointment_time;
-    cout << "Which timeslot do you prefer? ";
+    cout << "Enter the timeslot you prefer: ";
     cin >> Appointment_time;
 
     //check timeslot
@@ -1554,13 +1565,13 @@ void CreateAppointmentStaff() {
     int slotIndex = Appointment_time - 1;
     int slotStartHours[] = { 9, 11, 13, 15, 17, 19, 21 };
 
-    //passed day and time cant book
+    //pass time cant book
     if (dayOption == curDay && slotStartHours[slotIndex] <= curHour) {
         cout << RED << "\n[Error] This time slot has already passed for today!" << RESET << endl;
         return;
     }
 
-    //exceed time cant book
+    //cant book duplicate
     if (schedule[dayIndex][slotIndex].isBooked) {
         cout << RED << "\n[Sorry] Timeslot is already booked!" << RESET << endl;
         return;
@@ -1619,10 +1630,21 @@ void CreateAppointmentStaff() {
     schedule[dayIndex][slotIndex].isBooked = true;
 
     cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[dayIndex][slotIndex].time << "!" << RESET << endl;
+    cout << "\n------- Appointment Detail -------" << endl;
+    cout << "Day         : Day " << (dayIndex + 1) << endl;
+    cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
+    cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
+    cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
+    cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+    cout << "----------------------------------" << endl;
     cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
 }
 
 void CreateAppointmentCustomer(const string& customerID, const string& customerName) {
+
+    cout << "\n==========================================" << endl;
+    cout << "           CREATE APPOINTMENT             " << endl;
+    cout << "==========================================\n" << endl;
 
     //bring time
     int curYear, curMonth, curDay, curHour;
@@ -1641,7 +1663,7 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
         return;
     }
 
-    //check day must > right now
+    //pass day cant book
     if (dayOption < curDay) {
         cout << RED << "\n[Error] Cannot book appointments for past dates!" << RESET << endl;
         return;
@@ -1653,7 +1675,7 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
 
     //input time
     int Appointment_time;
-    cout << "Which timeslot do you prefer? ";
+    cout << "Enter the timeslot you prefer: ";
     cin >> Appointment_time;
 
     //check timeslot
@@ -1666,13 +1688,13 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     int slotIndex = Appointment_time - 1;
     int slotStartHours[] = { 9, 11, 13, 15, 17, 19, 21 };
 
-    //passed day and time cant book
+    //passed time cant book
     if (dayOption == curDay && slotStartHours[slotIndex] <= curHour) {
         cout << RED << "\n[Error] This time slot has already passed for today!" << RESET << endl;
         return;
     }
 
-    //exceed time cant book
+    //cant book duplicate
     if (schedule[dayIndex][slotIndex].isBooked) {
         cout << RED << "\n[Sorry] Timeslot is already booked!" << RESET << endl;
         return;
@@ -1714,7 +1736,6 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
         schedule[dayIndex][slotIndex].service = "Hair dressing with make up";
         break;
     default:
-        // FIXED: Added return to avoid booking slot with an invalid service
         cout << RED << "[Error] Invalid service option. Booking canceled." << RESET << endl;
         return;
     }
@@ -1730,5 +1751,199 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     schedule[dayIndex][slotIndex].isBooked = true;
 
     cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[dayIndex][slotIndex].time << "!" << RESET << endl;
+    cout << "\n------- Appointment Detail -------" << endl;
+    cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
+    cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
+    cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
+    cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
+    cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+    cout << "----------------------------------" << endl;
     cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
+}
+
+void CancelAppointment(const string& currentUserId) {
+
+    int curYear, curMonth, curDay, curHour;
+    getCurrentSystemTime(curYear, curMonth, curDay, curHour);
+
+    string targetID;
+    cout << "\n==========================================" << endl;
+    cout << "           CANCEL APPOINTMENT             " << endl;
+    cout << "==========================================\n" << endl;
+    cout << "Enter Appointment ID to cancel (e.g. APT1001): ";
+    cin >> targetID;
+
+    //default is false
+    bool found = false;
+
+    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
+        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+
+            //check wether is "booked" and have an "id"
+            if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].appointmentID == targetID) {
+                found = true;
+
+                //permission checking
+                if (!currentUserId.empty() && schedule[dayIndex][slotIndex].customerID != currentUserId) {
+                    cout << RED << "\n[Error] You do not have permission to cancel another customer's appointment!" << RESET << endl;
+                    return;
+                }
+
+                //print the details let user double check
+                cout << "\n------- Appointment Detail -------" << endl;
+                cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
+                cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
+                cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
+                cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
+                cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+                cout << "----------------------------------" << endl;
+
+                // double confirm
+                char confirm;
+                cout << "Are you sure you want to cancel this appointment? (Y/N): ";
+                cin >> confirm;
+
+                if (confirm == 'Y' || confirm == 'y') {
+                    schedule[dayIndex][slotIndex].isBooked = false;
+                    schedule[dayIndex][slotIndex].status = "Available";
+                    schedule[dayIndex][slotIndex].appointmentID = "-";
+                    schedule[dayIndex][slotIndex].customerID = "-";
+                    schedule[dayIndex][slotIndex].customerName = "-";
+                    schedule[dayIndex][slotIndex].staffID = "-";
+                    schedule[dayIndex][slotIndex].staffName = "-";
+                    schedule[dayIndex][slotIndex].service = "-";
+
+                    cout << GREEN << "\n[Success] Appointment " << targetID << " has been cancelled successfully!" << RESET << endl;
+                }
+                else {
+                    cout << RED << "\n[Info] Cancellation aborted." << RESET << endl;
+                }
+                return;
+            }
+        }
+    }
+    //if didnt found
+    if (!found) {
+        cout << RED << "\n[Error] Appointment ID '" << targetID << "' not found or is already cancelled." << RESET << endl;
+    }
+}
+
+void RescheduleAppointment(const string& currentUserId) {
+
+    int curYear, curMonth, curDay, curHour;
+    getCurrentSystemTime(curYear, curMonth, curDay, curHour);
+
+    string targetID;
+    cout << "\n==========================================" << endl;
+    cout << "          RESCHEDULE APPOINTMENT          " << endl;
+    cout << "==========================================\n" << endl;
+    cout << "Enter Appointment ID to reschedule (e.g. APT1001): ";
+    cin >> targetID;
+
+    //default is false
+    bool found = false;
+
+    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
+        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+
+            //check wether is "booked" and have an "id"
+            if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].appointmentID == targetID) {
+                found = true;
+
+                //permission checking
+                if (!currentUserId.empty() && schedule[dayIndex][slotIndex].customerID != currentUserId) {
+                    cout << RED << "\n[Error] You do not have permission to reschedule another customer's appointment!" << RESET << endl;
+                    return;
+                }
+
+                //print the details let user double check
+                cout << "\n------- Current Appointment Detail -------" << endl;
+                cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
+                cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
+                cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
+                cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
+                cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+                cout << "------------------------------------------" << endl;
+
+                // 1. input new day
+                int newDayOption;
+                cout << "\nEnter New Day of the Month (1 - 31): ";
+                cin >> newDayOption;
+
+                // check day
+                if (cin.fail() || newDayOption < 1 || newDayOption > 31) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << RED << "\n[Error] Invalid day input!" << RESET << endl;
+                    return;
+                }
+
+                // pass day cant book
+                if (newDayOption < curDay) {
+                    cout << RED << "\n[Error] Cannot reschedule to past dates!" << RESET << endl;
+                    return;
+                }
+
+                // open the day customer input
+                int newDayIndex = newDayOption - 1;
+                ViewAllAppointment(schedule[newDayIndex], TOTAL_SLOTS);
+
+                // 2. input new time
+                int newSlotOption;
+                cout << "Enter the new timeslot you prefer: ";
+                cin >> newSlotOption;
+
+                // check timeslot
+                if (cin.fail() || newSlotOption < 1 || newSlotOption > TOTAL_SLOTS) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << RED << "\n[Error] Invalid timeslot ID!" << RESET << endl;
+                    return;
+                }
+
+                int newSlotIndex = newSlotOption - 1;
+                int slotStartHours[] = { 9, 11, 13, 15, 17, 19, 21 };
+
+                // pass time cant book
+                if (newDayOption == curDay && slotStartHours[newSlotIndex] <= curHour) {
+                    cout << RED << "\n[Error] This time slot has already passed for today!" << RESET << endl;
+                    return;
+                }
+
+                // cant book duplicate
+                if (schedule[newDayIndex][newSlotIndex].isBooked) {
+                    cout << RED << "\n[Sorry] Selected timeslot is already booked!" << RESET << endl;
+                    return;
+                }
+
+                // 3. transfer data to new slot
+                schedule[newDayIndex][newSlotIndex].appointmentID = schedule[dayIndex][slotIndex].appointmentID;
+                schedule[newDayIndex][newSlotIndex].customerID = schedule[dayIndex][slotIndex].customerID;
+                schedule[newDayIndex][newSlotIndex].customerName = schedule[dayIndex][slotIndex].customerName;
+                schedule[newDayIndex][newSlotIndex].staffID = schedule[dayIndex][slotIndex].staffID;
+                schedule[newDayIndex][newSlotIndex].staffName = schedule[dayIndex][slotIndex].staffName;
+                schedule[newDayIndex][newSlotIndex].service = schedule[dayIndex][slotIndex].service;
+                schedule[newDayIndex][newSlotIndex].status = "Booked";
+                schedule[newDayIndex][newSlotIndex].isBooked = true;
+
+                // 4. reset original slot
+                schedule[dayIndex][slotIndex].isBooked = false;
+                schedule[dayIndex][slotIndex].status = "Available";
+                schedule[dayIndex][slotIndex].appointmentID = "-";
+                schedule[dayIndex][slotIndex].customerID = "-";
+                schedule[dayIndex][slotIndex].customerName = "-";
+                schedule[dayIndex][slotIndex].staffID = "-";
+                schedule[dayIndex][slotIndex].staffName = "-";
+                schedule[dayIndex][slotIndex].service = "-";
+
+                cout << GREEN << "\n[Success] Appointment " << targetID << " has been rescheduled successfully!" << RESET << endl;
+                return;
+            }
+        }
+    }
+
+    //if didnt found
+    if (!found) {
+        cout << RED << "\n[Error] Appointment ID '" << targetID << "' not found or is already cancelled." << RESET << endl;
+    }
 }
