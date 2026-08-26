@@ -773,11 +773,7 @@ void registerStaff() {
     int posChoice = 0;
     while (true) {
         cout << "\nWhat position do you want to hire for?\n";
-        cout << "[ 1 ] Hair Stylist\n";
-        "[ 2 ] Skincare Specialist\n";
-        "[ 3 ] Hair Color Stylist\n";
-        "[ 4 ] Nail Technician\n";
-        "[ 5 ] Receptionist\n";
+        cout << "[ 1 ] Hair Stylist\n[ 2 ] Skincare Specialist\n[ 3 ] Hair Color Stylist\n[ 4 ] Nail Technician\n[ 5 ] Receptionist\n";
         cout << "Select position (1-5): ";
 
         if (cin >> posChoice && posChoice >= 1 && posChoice <= 5) {
