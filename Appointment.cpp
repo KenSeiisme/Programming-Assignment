@@ -2130,7 +2130,7 @@ void MarkAppointmentStatus() {
                     schedule[dayIndex][slotIndex].status = "No-Show";
                     break;
                 case 4:
-                    // 如果选择标记为 Cancelled，自动释放该 Timeslot
+
                     schedule[dayIndex][slotIndex].status = "Cancelled";
                     schedule[dayIndex][slotIndex].isBooked = false;
                     break;
