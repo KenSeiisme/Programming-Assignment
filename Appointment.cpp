@@ -121,17 +121,19 @@ Staff staffDB[MAX_STAFF] = {
 // Function Declarations
 void logo();
 void mainMenu();
+//Customer and member area
 void customerPortal();
 void registerCustomer();
 void registerMember();
 void customerMemberLogin();
 void staffPortal();
-void registerStaff();
-void staffLogin();
 void showCustomerMemberUI(const string& userId, const string& accountType);
 void memberCustomerProfile(const string& userId, const string& accountType);
 void viewProfile(const string& userId, const string& accountType);
 void editProfileCMUI(const string& userId, const string& accountType);
+//Staff area
+void registerStaff();
+void staffLogin();
 void showStaffUI(const string& username);
 void memberManagement();
 void staffManagement();
