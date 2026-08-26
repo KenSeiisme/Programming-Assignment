@@ -2050,7 +2050,7 @@ void ViewStaffSchedule() {
                         << "|" << endl;
                 }
             }
-        }
+        } 
 
         cout << separator << endl;
 
