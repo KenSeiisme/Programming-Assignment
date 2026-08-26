@@ -155,6 +155,7 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
 void CancelAppointment(const string& currentUserId = "");
 void RescheduleAppointment(const string& currentUserId = "");
 void ViewStaffSchedule();
+void AppointmentMarking();
 void initMonthlySchedule();
 
 int main() {
@@ -515,7 +516,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input.\n";
+            cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
         if (choice == 5) {
@@ -537,7 +538,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             cout << "\n-> [Customer UI] Billing module selected.\n";
             break;
         default:
-            cout << RED << "Invalid selection.\n" << RESET;
+            cout << RED << "[Error] Invalid selection.\n" << RESET;
         }
     }
 }
@@ -554,7 +555,7 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input.\n";
+            cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
 
@@ -578,7 +579,7 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
             cout << "Returning to Main Menu...\n";
             return;
         default:
-            cout << RED << "Invalid option. Try again.\n" << RESET;
+            cout << RED << "[Error] Invalid option. Try again.\n" << RESET;
         }
     }
 }
@@ -687,7 +688,7 @@ void staffPortal() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << RED << "Invalid input.\n" << RESET;
+            cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
 
@@ -702,7 +703,7 @@ void staffPortal() {
             cout << "Returning to Main Menu...\n";
             return;
         default:
-            cout << RED << "Invalid option. Try again.\n" << RESET;
+            cout << RED << "[Error] Invalid option. Try again.\n" << RESET;
         }
     }
 }
@@ -848,7 +849,7 @@ void showStaffUI(const string& username) {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << RED << "Invalid input.\n" << RESET;
+            cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
 
@@ -905,7 +906,7 @@ void showStaffUI(const string& username) {
             cout << "\n[System] Reporting module selected.\n";
             break;
         default:
-            cout << RED << "Invalid selection.\n" << RESET;
+            cout << RED << "[Error] Invalid selection.\n" << RESET;
         }
     }
 }
@@ -951,7 +952,7 @@ void staffManagement() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << RED << "Invalid input. Please enter a valid number.\n" << RESET;
+            cout << RED << "[Error] Invalid input. Please enter a valid number.\n" << RESET;
             continue;
         }
 
@@ -1074,7 +1075,7 @@ void staffManagement() {
             break;
         }
         default:
-            cout << RED << "Invalid option. Please enter 1 to 5.\n" << RESET;
+            cout << RED << "[Error] Invalid option. Please enter 1 to 5.\n" << RESET;
         }
     }
 }
@@ -1128,7 +1129,7 @@ void memberManagement() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << RED << "Invalid input. Please enter a valid number.\n" << RESET;
+            cout << RED << "[Error] Invalid input. Please enter a valid number.\n" << RESET;
             continue;
         }
 
@@ -1253,7 +1254,7 @@ void memberManagement() {
             break;
         }
         default:
-            cout << RED << "Invalid option. Please enter 1 to 5.\n" << RESET;
+            cout << RED << "[Error] Invalid option. Please enter 1 to 5.\n" << RESET;
         }
     }
 }
@@ -1282,7 +1283,7 @@ void AppointmentStaff() {
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input! Please enter a number from 1 to 6." << endl;
+            cout << RED << "[Error] Invalid input! Please enter a number from 1 to 6." << RESET << endl;
             cout << "\nPress Enter to return to the menu...";
             cin.get();
             continue;
@@ -1296,7 +1297,7 @@ void AppointmentStaff() {
             if (cin.fail() || day < 1 || day > 31) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid day! Please enter a day from 1 to 31." << endl;
+                cout << RED << "[Error] Invalid day! Please enter a day from 1 to 31." << RESET << endl;
                 break;
             }
 
@@ -1305,11 +1306,10 @@ void AppointmentStaff() {
             ViewAllAppointment(schedule[dayIndex], TOTAL_SLOTS);
             break;
         }
-        case 2: {
+        case 2:
             cout << "You selected: Create a New Appointment" << endl;
             CreateAppointmentStaff();
             break;
-        }
         case 3:
             cout << "You selected: Cancel Appointment" << endl;
             CancelAppointment();
@@ -1324,12 +1324,13 @@ void AppointmentStaff() {
             break;
         case 6:
             cout << "You selected: Appointment Marking" << endl;
+            AppointmentMarking();
             break;
-        case 7:
+        case 0:
             cout << "Returning to Staff Menu..." << endl;
             return;
         default:
-            cout << "Invalid option. Please select a valid option from the menu." << endl;
+            cout << RED << "[Error] Invalid option. Please select a valid option from the menu." << RESET << endl;
         }
 
         if (option != 0) {
@@ -1362,29 +1363,30 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input! Please enter a number from 1 to 3." << endl;
+            cout << RED << "[Error] Invalid input! Please enter a number from 1 to 3." << RESET << endl;
             cout << "\nPress Enter to return to the menu...";
             cin.get();
             continue;
         }
 
         switch (option) {
-        case 1: {
+        case 1: 
             cout << "You selected: Create a New Appointment" << endl;
             CreateAppointmentCustomer(currentUserId, currentUserName);
             break;
-        }
-        case 2: {
+        case 2: 
             cout << "You selected: Cancel Appointment" << endl;
             CancelAppointment(currentUserId);
             break;
-        }
         case 3:
             cout << "You selected: Reschedule Appointment" << endl;
             RescheduleAppointment(currentUserId);
             break;
+        case 0:
+            cout << "Returning to Customer/Member Menu..." << endl;
+            return;
         default:
-            cout << "Invalid option. Please select a valid option from the menu." << endl;
+            cout << RED << "[Error] Invalid option. Please select a valid option from the menu." << RESET << endl;
         }
 
         if (option != 0) {
@@ -1465,7 +1467,17 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         //table info width
         string appointmentID = schedule[i].isBooked ? schedule[i].appointmentID : "-";
         string statusAppointment = schedule[i].isBooked ? schedule[i].status : "Available";
-        string statuscolor = schedule[i].isBooked ? RED : GREEN;
+        //relate with AppointmentMarking()
+        string statuscolor;
+        if (!schedule[i].isBooked || schedule[i].status == "Completed") {
+            statuscolor = GREEN;
+        }
+        else if (schedule[i].status == "Pending Payment" || schedule[i].status == "No-Show") {
+            statuscolor = YELLOW;
+        }
+        else {
+            statuscolor = RED;
+        }
         string staffID = schedule[i].isBooked ? schedule[i].staffID : "-";
         string staffname = schedule[i].isBooked ? schedule[i].staffName : "-";
         string customerID = schedule[i].isBooked ? schedule[i].customerID : "-";
@@ -2092,7 +2104,7 @@ void ViewStaffSchedule() {
     }
 }
 
-void MarkAppointmentStatus() {
+void AppointmentMarking() {
     int curYear, curMonth, curDay, curHour;
     getCurrentSystemTime(curYear, curMonth, curDay, curHour);
 
@@ -2125,16 +2137,15 @@ void MarkAppointmentStatus() {
 
                 // select new status
                 cout << "\nSelect New Status:\n";
-                cout << "1. Completed (已完成)\n";
-                cout << "2. In Progress (进行中)\n";
-                cout << "3. No-Show (未出席)\n";
-                cout << "4. Cancelled (标记取消)\n";
-                cout << "Select status option (1 - 4): ";
+                cout << "1. Completed\n";
+                cout << "2. Pending Payment\n";
+                cout << "3. No-Show\n";
+                cout << "Select status option (1 - 3): ";
 
                 int markOption;
                 cin >> markOption;
 
-                if (cin.fail() || markOption < 1 || markOption > 4) {
+                if (cin.fail() || markOption < 1 || markOption > 3) {
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << RED << "\n[Error] Invalid status option!" << RESET << endl;
@@ -2146,15 +2157,10 @@ void MarkAppointmentStatus() {
                     schedule[dayIndex][slotIndex].status = "Completed";
                     break;
                 case 2:
-                    schedule[dayIndex][slotIndex].status = "In Progress";
+                    schedule[dayIndex][slotIndex].status = "Pending Payment";
                     break;
                 case 3:
                     schedule[dayIndex][slotIndex].status = "No-Show";
-                    break;
-                case 4:
-
-                    schedule[dayIndex][slotIndex].status = "Cancelled";
-                    schedule[dayIndex][slotIndex].isBooked = false;
                     break;
                 }
 
