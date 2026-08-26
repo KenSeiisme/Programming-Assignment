@@ -140,10 +140,12 @@ void staffManagement();
 void showStaffList();
 void showMemberCustomerList();
 void clearInput();
+//Validation
 bool isValidEmail(const string& email);
 bool isValidPassword(const string& pass);
 bool isValidPhoneNumber(const string& phone);
 bool isValidName(const string& name);
+//Appointment
 void AppointmentStaff();
 void AppointmentCustomer(const string& currentUserId, const string& currentUserName);
 void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffID = "");
@@ -160,7 +162,7 @@ int main() {
     mainMenu();
     return 0;
 }
-
+//find user
 int findCustomerIndex(const string& id) {
     for (int i = 0; i < customerCount; ++i) {
         if (customerDB[i].idCustomer == id) return i;
@@ -187,7 +189,7 @@ int findStaffIndex(const string& id) {
     }
     return -1;
 }
-
+//Validation name,phone number,email and passsword
 bool isValidName(const string& name) {
     if (name.empty()) return false;
     for (char c : name) {
@@ -222,7 +224,7 @@ bool isValidPassword(const string& pass) {
     }
     return hasLetter && hasDigit;
 }
-
+//Display one time output,without unlimited
 void clearInput() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -253,7 +255,7 @@ void mainMenu() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input. Please enter a valid number.\n";
+            cout << RED << "Invalid input. Please enter a valid number.\n" << RESET;
             continue;
         }
 
@@ -268,11 +270,11 @@ void mainMenu() {
             cout << "Exiting application. Goodbye!\n";
             return;
         default:
-            cout << "Invalid selection. Please enter 1, 2, or 3.\n";
+            cout << RED << "Invalid selection. Please enter 1, 2, or 3.\n" << RESET;
         }
     }
 }
-
+//After choose customer/member it will go to customer portal
 void customerPortal() {
     int choice = 0;
     while (true) {
@@ -301,35 +303,33 @@ void customerPortal() {
             cout << "Returning to Main Menu...\n";
             return;
         default:
-            cout << "Invalid option. Try again.\n";
+            cout << RED << "Invalid option. Try again.\n" << RESET;
         }
     }
 }
-
+//register customer
 void registerCustomer() {
     if (customerCount >= MAX_CUSTOMERS) {
-        cout << "[Error] Customer database capacity reached!\n";
+        cout << RED << "[Error] Customer database capacity reached!\n" << RESET;
         return;
     }
-
+    //Generated Customer ID 
     Customer newCustomer;
     cout << "\n--- NEW CUSTOMER REGISTRATION ---\n";
-    string customerGeneratedID = "C" + to_string(customerCounter++);
 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+    //while(true) means infinate loop forever play until correct
     while (true) {
         cout << "Enter Full Name: ";
         getline(cin, newCustomer.nameCustomer);
         if (isValidName(newCustomer.nameCustomer)) break;
-        cout << "[Error] Invalid name! Only can use alphabet. Try again.\n";
+        cout << RED << "[Error] Invalid name! Only can use alphabet. Try again.\n" << RESET;;
     }
 
     string genderInput;
     while (true) {
         cout << "Enter Gender (m/f): ";
         cin >> genderInput;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         if (genderInput == "m" || genderInput == "M") {
             newCustomer.genderCustomer = "Male";
@@ -340,7 +340,7 @@ void registerCustomer() {
             break;
         }
         else {
-            cout << "[Error] Invalid gender! Please enter 'm' for Male or 'f' for Female.\n";
+            cout << RED << "[Error] Invalid gender! Please enter 'm' for Male or 'f' for Female.\n" << RESET;
         }
     }
 
@@ -348,22 +348,25 @@ void registerCustomer() {
         cout << "Enter Phone Number (e.g.: xxx-xxxxxxxx): ";
         cin >> newCustomer.phoneCustomer;
         if (isValidPhoneNumber(newCustomer.phoneCustomer)) break;
-        cout << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n";
+        cout << RED << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n" << RESET;
     }
 
     while (true) {
         cout << "Enter Email Address (must end with @gmail.com): ";
         cin >> newCustomer.emailCustomer;
         if (isValidEmail(newCustomer.emailCustomer)) break;
-        cout << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n";
+        cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
     }
 
     while (true) {
         cout << "Enter Password (min 8 chars, must contain letters & digits): ";
         cin >> newCustomer.passwordCustomer;
         if (isValidPassword(newCustomer.passwordCustomer)) break;
-        cout << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n";
+        cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
     }
+    //Generated Customer ID
+    string customerGeneratedID = "C" + to_string(customerCounter++);
+    //Save to database
     newCustomer.idCustomer = customerGeneratedID;
     customerDB[customerCount++] = newCustomer;
 
@@ -376,13 +379,13 @@ void registerCustomer() {
     cout << "============================================\n";
     cout << "Please keep your Customer ID to log in.\n";
 }
-
+//register as member
 void registerMember() {
     if (memberCount >= MAX_MEMBERS) {
-        cout << "[Error] Member database capacity reached!\n";
+        cout << RED << "[Error] Member database capacity reached!\n" << RESET;
         return;
     }
-    char response;
+    char response, responseRenew;
     Member newMember;
     cout << "\n--- NEW MEMBER REGISTRATION ---\n";
 
@@ -397,7 +400,7 @@ void registerMember() {
             cout << "Enter Full Name: ";
             getline(cin, newMember.nameMember);
             if (isValidName(newMember.nameMember)) break;
-            cout << "[Error] Invalid name! Only can use alphabet. Try again.\n";
+            cout << RED << "[Error] Invalid name! Only can use alphabet. Try again.\n" << RESET;
         }
 
         string genderInput;
@@ -415,7 +418,7 @@ void registerMember() {
                 break;
             }
             else {
-                cout << "[Error] Invalid gender! Please enter 'm' for Male or 'f' for Female.\n";
+                cout << RED << "[Error] Invalid gender! Please enter 'm' for Male or 'f' for Female.\n" << RESET;
             }
         }
 
@@ -424,7 +427,7 @@ void registerMember() {
             cin >> newMember.phoneMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (isValidPhoneNumber(newMember.phoneMember)) break;
-            cout << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n";
+            cout << RED << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n" << RESET;
         }
 
         while (true) {
@@ -432,7 +435,7 @@ void registerMember() {
             cin >> newMember.emailMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (isValidEmail(newMember.emailMember)) break;
-            cout << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n";
+            cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
         }
 
         while (true) {
@@ -440,12 +443,13 @@ void registerMember() {
             cin >> newMember.passwordMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (isValidPassword(newMember.passwordMember)) break;
-            cout << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n";
+            cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
         }
-
+        //Generated Member ID
         string memberGeneratedID = "M" + to_string(memberCounter++);
+        //Save to database
         newMember.idMember = memberGeneratedID;
-        memberDB[memberCount++] = newMember;
+        memberDB[memberCount++] = newMember;//add and save in member database
 
         cout << "\n[Success] Member registration completed!\n";
         cout << "================================================\n";
@@ -460,7 +464,7 @@ void registerMember() {
         cout << "Please pay Member Fee first at the counter." << endl;
     }
 }
-
+//login member or customer
 void customerMemberLogin() {
     string idCustomerMember, passCustomerMember;
     cout << "\n--- CUSTOMER / MEMBER LOGIN ---\n";
@@ -471,19 +475,19 @@ void customerMemberLogin() {
 
     int memIdx = findMemberIndex(idCustomerMember);
     if (memIdx != -1 && memberDB[memIdx].passwordMember == passCustomerMember) {
-        cout << "\nMember login successful!\n";
+        cout << GREEN << "\nMember login successful!\n" << RESET;
         showCustomerMemberUI(idCustomerMember, "Member");
         return;
     }
 
     int custIdx = findCustomerIndex(idCustomerMember);
     if (custIdx != -1 && customerDB[custIdx].passwordCustomer == passCustomerMember) {
-        cout << "\nCustomer login successful!\n";
+        cout << GREEN << "\nCustomer login successful!\n" << RESET;
         showCustomerMemberUI(idCustomerMember, "Customer");
         return;
     }
 
-    cout << "\n[Error] Invalid Customer/Member ID or Password.\n";
+    cout << RED << "\n[Error] Invalid Customer/Member ID or Password.\n" << RESET;
 }
 
 void showCustomerMemberUI(const string& userId, const string& accountType) {
@@ -533,7 +537,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             cout << "\n-> [Customer UI] Billing module selected.\n";
             break;
         default:
-            cout << "Invalid selection.\n";
+            cout << RED << "Invalid selection.\n" << RESET;
         }
     }
 }
@@ -544,8 +548,9 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
         cout << "============ MEMBER/CUSTOMER PROFILE ============\n";
         cout << "[ 1 ] View your profile\n";
         cout << "[ 2 ] Edit Profile\n";
-        cout << "[ 3 ] Exit (Return to Main Menu)\n";
-        cout << "Select option (1-3): ";
+        cout << "[ 3 ] Renew membership\n";
+        cout << "[ 4 ] Exit (Return to Main Menu)\n";
+        cout << "Select option (1-4): ";
 
         if (!(cin >> choice)) {
             clearInput();
@@ -561,15 +566,24 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
             editProfileCMUI(userId, accountType);
             break;
         case 3:
+            if (accountType == "Customer") {//When login as customer it will give this message
+                cout << RED << "\n[Access Denied] Standard customers cannot renew membership.\n" << RESET;
+                cout << "Please register as a Member first to enjoy membership features.\n";
+            }
+            else {
+                cout << "\n[Success] Membership renewed successfully!\n";
+            }
+            break;
+        case 4:
             cout << "Returning to Main Menu...\n";
             return;
         default:
-            cout << "Invalid option. Try again.\n";
+            cout << RED << "Invalid option. Try again.\n" << RESET;
         }
     }
 }
 
-void viewProfile(const string& userId, const string& accountType) {
+void viewProfile(const string& userId, const string& accountType) { //show the information same as customer or member log in
     cout << "\n========================================\n";
     cout << "           YOUR PROFILE INFO            \n";
     cout << "========================================\n";
@@ -606,7 +620,7 @@ void editProfileCMUI(const string& userId, const string& accountType) {
 
         if (!(cin >> updateChoice)) {
             clearInput();
-            cout << "[Error] Invalid selection. Try again.\n";
+            cout << RED << "[Error] Invalid selection. Try again.\n" << RESET;
             continue;
         }
 
@@ -618,43 +632,46 @@ void editProfileCMUI(const string& userId, const string& accountType) {
         case 1: {
             string newEmail;
             while (true) {
+                //change member or customer email
                 cout << "Enter new Email Address (must end with @gmail.com): ";
                 cin >> newEmail;
                 if (isValidEmail(newEmail)) break;
-                cout << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n";
+                cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
             }
-            if (accountType == "Member") memberDB[findMemberIndex(userId)].emailMember = newEmail;
-            else customerDB[findCustomerIndex(userId)].emailCustomer = newEmail;
+            if (accountType == "Member") memberDB[findMemberIndex(userId)].emailMember = newEmail;//member
+            else customerDB[findCustomerIndex(userId)].emailCustomer = newEmail;//email
 
-            cout << "\n[Success] Email updated successfully!\n";
+            cout << GREEN << "\n[Success] Email updated successfully!\n" << RESET;
             break;
         }
         case 2: {
+            //change member or customer phone number
             string newPhone;
             cout << "Enter new Phone Number: ";
             cin >> newPhone;
-            if (accountType == "Member") memberDB[findMemberIndex(userId)].phoneMember = newPhone;
-            else customerDB[findCustomerIndex(userId)].phoneCustomer = newPhone;
+            if (accountType == "Member") memberDB[findMemberIndex(userId)].phoneMember = newPhone;//member
+            else customerDB[findCustomerIndex(userId)].phoneCustomer = newPhone;//customer
 
-            cout << "\n[Success] Phone number updated successfully!\n";
+            cout << GREEN << "\n[Success] Phone number updated successfully!\n" << RESET;
             break;
         }
         case 3: {
+            //change member or customer password
             string newPass;
             while (true) {
                 cout << "Enter new Password (min 8 chars, letter & digit): ";
                 cin >> newPass;
                 if (isValidPassword(newPass)) break;
-                cout << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n";
+                cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
             }
-            if (accountType == "Member") memberDB[findMemberIndex(userId)].passwordMember = newPass;
-            else customerDB[findCustomerIndex(userId)].passwordCustomer = newPass;
+            if (accountType == "Member") memberDB[findMemberIndex(userId)].passwordMember = newPass;//member
+            else customerDB[findCustomerIndex(userId)].passwordCustomer = newPass;//customer
 
-            cout << "\n[Success] Password updated successfully!\n";
+            cout << GREEN << "\n[Success] Password updated successfully!\n" << RESET;
             break;
         }
         default:
-            cout << "\n[Error] Invalid option selected. Try again.\n";
+            cout << RED << "\n[Error] Invalid option selected. Try again.\n" << RESET;
         }
     }
 }
@@ -670,7 +687,7 @@ void staffPortal() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input.\n";
+            cout << RED << "Invalid input.\n" << RESET;
             continue;
         }
 
@@ -685,14 +702,14 @@ void staffPortal() {
             cout << "Returning to Main Menu...\n";
             return;
         default:
-            cout << "Invalid option. Try again.\n";
+            cout << RED << "Invalid option. Try again.\n" << RESET;
         }
     }
 }
 
 void registerStaff() {
     if (staffCount >= MAX_STAFF) {
-        cout << "[Error] Staff database capacity reached!\n";
+        cout << RED << "[Error] Staff database capacity reached!\n" << RESET;
         return;
     }
 
@@ -703,12 +720,13 @@ void registerStaff() {
     clearInput();
 
     while (true) {
+        //write name with alphabet only
         cout << "Enter Full Name: ";
         getline(cin, newStaff.nameStaff);
         if (isValidName(newStaff.nameStaff)) break;
-        cout << "[Error] Invalid name! Alphabet only. Try again.\n";
+        cout << RED << "[Error] Invalid name! Alphabet only. Try again.\n" << RESET;
     }
-
+    //choose gender
     string genderInput;
     while (true) {
         cout << "Enter Gender (m/f): ";
@@ -724,38 +742,42 @@ void registerStaff() {
             break;
         }
         else {
-            cout << "[Error] Invalid gender! Enter 'm' or 'f'.\n";
+            cout << RED << "[Error] Invalid gender! Enter 'm' or 'f'.\n" << RESET;
         }
     }
-
+    //must have digit and dash
     while (true) {
         cout << "Enter Phone Number (e.g.: xxx-xxxxxxxx): ";
         cin >> newStaff.phoneStaff;
         clearInput();
         if (isValidPhoneNumber(newStaff.phoneStaff)) break;
-        cout << "[Error] Invalid phone number format.\n";
+        cout << RED << "[Error] Invalid phone number format.\n" << RESET;
     }
-
+    // eneter email must add "@gmail.com"
     while (true) {
         cout << "Enter Email Address (must end with @gmail.com): ";
         cin >> newStaff.emailStaff;
         clearInput();
         if (isValidEmail(newStaff.emailStaff)) break;
-        cout << "[Error] Invalid email address.\n";
+        cout << RED << "[Error] Invalid email address.\n" << RESET;
     }
-
+    // password must at least 8 characters and digit and alphabet
     while (true) {
         cout << "Enter Password (Minimun 8 chars, must contain letters & digits): ";
         cin >> newStaff.passwordStaff;
         clearInput();
         if (isValidPassword(newStaff.passwordStaff)) break;
-        cout << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n";
+        cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
     }
 
     int posChoice = 0;
     while (true) {
         cout << "\nWhat position do you want to hire for?\n";
-        cout << "[ 1 ] Hair Stylist\n[ 2 ] Skincare Specialist\n[ 3 ] Hair Color Stylist\n[ 4 ] Nail Technician\n[ 5 ] Receptionist\n";
+        cout << "[ 1 ] Hair Stylist\n";
+        "[ 2 ] Skincare Specialist\n";
+        "[ 3 ] Hair Color Stylist\n";
+        "[ 4 ] Nail Technician\n";
+        "[ 5 ] Receptionist\n";
         cout << "Select position (1-5): ";
 
         if (cin >> posChoice && posChoice >= 1 && posChoice <= 5) {
@@ -771,7 +793,7 @@ void registerStaff() {
         }
         else {
             clearInput();
-            cout << "[Error] Invalid position selection. Please enter a number between 1 and 5.\n";
+            cout << RED << "[Error] Invalid position selection. Please enter a number between 1 and 5.\n" << RESET;
         }
     }
     newStaff.idStaff = generatedID;
@@ -798,26 +820,26 @@ void staffLogin() {
     cout << "Password: ";
     cin >> passStaff;
     clearInput();
-
-    int idx = findStaffIndex(idStaff);
-    if (idx != -1 && staffDB[idx].passwordStaff == passStaff) {
-        cout << "\nStaff authentication successful!\n";
-        cout << "Welcome, " << staffDB[idx].nameStaff << " (" << staffDB[idx].positionStaff << ")!\n";
+    //check the id and password same as the database
+    int stfidx = findStaffIndex(idStaff);
+    if (stfidx != -1 && staffDB[stfidx].passwordStaff == passStaff) {
+        cout << RED << "\nStaff authentication successful!\n" << RESET;
+        cout << GREEN << "Welcome, " << staffDB[stfidx].nameStaff << " (" << staffDB[stfidx].positionStaff << ")!\n" << RESET;
         showStaffUI(idStaff);
     }
     else {
-        cout << "\n[Error] Invalid Staff credentials.\n";
+        cout << RED << "\n[Error] Invalid Staff credentials.\n" << RESET;
     }
-} // FIXED: Removed extra trailing closing brace here
+}
 
 void showStaffUI(const string& username) {
     int choice = 0;
-    int idx = findStaffIndex(username);
+    int stfidx = findStaffIndex(username);
     while (true) {
         cout << "\n************************************************************\n";
         cout << "                STAFF CONTROL PANEL           \n";
-        cout << " Staff ID: " << username << " | " << staffDB[idx].nameStaff
-            << " (" << staffDB[idx].positionStaff << ")\n";
+        cout << " Staff ID: " << username << " | " << staffDB[stfidx].nameStaff
+            << " (" << staffDB[stfidx].positionStaff << ")\n";
         cout << "\n************************************************************\n";
         cout << "[ 1 ] Customer/Member Info Management\n";
         cout << "[ 2 ] Staff Info Management\n";
@@ -830,7 +852,7 @@ void showStaffUI(const string& username) {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input.\n";
+            cout << RED << "Invalid input.\n" << RESET;
             continue;
         }
 
@@ -839,7 +861,7 @@ void showStaffUI(const string& username) {
             break;
         }
         switch (choice) {
-        case 1: {
+        case 1: { //This area is the staff need to enter staff id same as login only can enter customer/member management
             string confirmID;
             cout << "============= STAFF VERIFICATION REQUIRED =============\n";
             cout << "Enter Staff ID to access Member Management: ";
@@ -848,15 +870,15 @@ void showStaffUI(const string& username) {
 
             int confirmIdx = findStaffIndex(confirmID);
             if (confirmIdx != -1 && confirmID == username) {
-                cout << "\n[Access Granted] Verified identity: " << staffDB[confirmIdx].nameStaff << "\n";
+                cout << RED << "\n[Access Granted] Verified identity: " << RESET << staffDB[confirmIdx].nameStaff << "\n";
                 memberManagement();
             }
             else {
-                cout << "\n[Access Denied] Invalid or mismatched Staff ID!\n";
+                cout << RED << "\n[Access Denied] Invalid or mismatched Staff ID!\n" << RESET;
             }
             break;
         }
-        case 2: {
+        case 2: {//This area is the staff need to enter staff id same as login only can enter staff mangement
             string confirmID;
             cout << "============= STAFF VERIFICATION REQUIRED =============\n";
             cout << "Enter Staff ID to access Staff Management: ";
@@ -865,11 +887,11 @@ void showStaffUI(const string& username) {
 
             int confirmIdx = findStaffIndex(confirmID);
             if (confirmIdx != -1 && confirmID == username) {
-                cout << "\n[Access Granted] Verified identity: " << staffDB[confirmIdx].nameStaff << "\n";
+                cout << GREEN << "\n[Access Granted] Verified identity: " << RESET << staffDB[confirmIdx].nameStaff << "\n";
                 staffManagement();
             }
             else {
-                cout << "\n[Access Denied] Invalid or mismatched Staff ID!\n";
+                cout << RED << "\n[Access Denied] Invalid or mismatched Staff ID!\n" << RESET;
             }
             break;
         }
@@ -887,12 +909,13 @@ void showStaffUI(const string& username) {
             cout << "\n[System] Reporting module selected.\n";
             break;
         default:
-            cout << "Invalid selection.\n";
+            cout << RED << "Invalid selection.\n" << RESET;
         }
     }
 }
 
 void showStaffList() {
+    //table staff
     cout << right << setw(70) << "< TABLE STAFF >" << endl;
     string border = "+----------+------------------------+----------+----------------+----------------------------+----------------------+----------------------+";
 
@@ -932,7 +955,7 @@ void staffManagement() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input. Please enter a valid number.\n";
+            cout << RED << "Invalid input. Please enter a valid number.\n" << RESET;
             continue;
         }
 
@@ -944,24 +967,25 @@ void staffManagement() {
         string idStaff;
         switch (choice) {
         case 1: {
+            //Staff table
             showStaffList();
             break;
         }
         case 2: {
             cout << "\nEnter Staff ID to search: ";
             cin >> idStaff;
-
-            int idx = findStaffIndex(idStaff);
-            if (idx != -1) {
-                cout << "\n[Found] ID: " << staffDB[idx].idStaff
-                    << " | Name: " << staffDB[idx].nameStaff
-                    << " | Gender: " << staffDB[idx].genderStaff
-                    << " | Phone: " << staffDB[idx].phoneStaff
-                    << " | Email: " << staffDB[idx].emailStaff
-                    << " | Position: " << staffDB[idx].positionStaff << "\n";
+            //search staff information by using staff ID
+            int stfidx = findStaffIndex(idStaff);
+            if (stfidx != -1) {
+                cout << "\n[Found] ID: " << staffDB[stfidx].idStaff
+                    << " | Name: " << staffDB[stfidx].nameStaff
+                    << " | Gender: " << staffDB[stfidx].genderStaff
+                    << " | Phone: " << staffDB[stfidx].phoneStaff
+                    << " | Email: " << staffDB[stfidx].emailStaff
+                    << " | Position: " << staffDB[stfidx].positionStaff << "\n";
             }
             else {
-                cout << "\n[Error] Staff ID '" << idStaff << "' not found.\n";
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found.\n" << RESET;
             }
             break;
         }
@@ -969,16 +993,16 @@ void staffManagement() {
             cout << "\nEnter Staff ID to delete: ";
             cin >> idStaff;
 
-            int idx = findStaffIndex(idStaff);
-            if (idx != -1) {
-                for (int i = idx; i < staffCount - 1; ++i) {
+            int stfidx = findStaffIndex(idStaff);
+            if (stfidx != -1) {
+                for (int i = stfidx; i < staffCount - 1; ++i) {
                     staffDB[i] = staffDB[i + 1];
                 }
                 staffCount--;
-                cout << "\n[Success] Staff '" << idStaff << "' deleted successfully.\n";
+                cout << GREEN << "\n[Success] Staff '" << RESET << idStaff << GREEN << "' deleted successfully.\n" << RESET;
             }
             else {
-                cout << "\n[Error] Staff ID '" << idStaff << "' not found. Delete canceled.\n";
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Delete canceled.\n" << RESET;
             }
             break;
         }
@@ -986,9 +1010,9 @@ void staffManagement() {
             cout << "\nEnter Staff ID to update: ";
             cin >> idStaff;
 
-            int idx = findStaffIndex(idStaff);
-            if (idx == -1) {
-                cout << "\n[Error] Staff ID '" << idStaff << "' not found. Update canceled.\n";
+            int stfidx = findStaffIndex(idStaff);
+            if (stfidx == -1) {
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Update canceled.\n" << RESET;
                 break;
             }
 
@@ -1002,63 +1026,63 @@ void staffManagement() {
             int updateChoice = 0;
             if (!(cin >> updateChoice)) {
                 clearInput();
-                cout << "[Error] Invalid selection. Update canceled.\n";
+                cout << RED << "[Error] Invalid selection. Update canceled.\n" << RESET;
                 break;
             }
 
             switch (updateChoice) {
-            case 1: {
+            case 1: { //change email
                 string newEmail;
-                while (true) {
+                while (true) { // change staff email
                     cout << "Enter new Email Address (must end with @gmail.com): ";
                     cin >> newEmail;
                     if (isValidEmail(newEmail)) break;
-                    cout << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n";
+                    cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
                 }
-                staffDB[idx].emailStaff = newEmail;
-                cout << "\n[Success] Email updated successfully for Staff ID '" << idStaff << "'!\n";
+                staffDB[stfidx].emailStaff = newEmail;
+                cout << GREEN << "\n[Success] Email updated successfully for Staff ID '" << RESET << idStaff << GREEN << "'!\n" << RESET;
                 break;
             }
-            case 2: {
+            case 2: { // change staff phone number
                 string newPhone;
                 cout << "Enter new Phone Number: ";
                 cin >> newPhone;
-                staffDB[idx].phoneStaff = newPhone;
-                cout << "\n[Success] Phone number updated successfully for Staff ID '" << idStaff << "'!\n";
+                staffDB[stfidx].phoneStaff = newPhone;
+                cout << GREEN << "\n[Success] Phone number updated successfully for Staff ID '" << RESET << idStaff << GREEN << "'!\n" << RESET;
                 break;
             }
             case 3: {
                 string newPass;
-                while (true) {
+                while (true) { //change staff password
                     cout << "Enter new Password (min 8 chars, letter & digit): ";
                     cin >> newPass;
                     if (isValidPassword(newPass)) break;
-                    cout << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n";
+                    cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
                 }
-                staffDB[idx].passwordStaff = newPass;
-                cout << "\n[Success] Password updated successfully for Staff ID '" << idStaff << "'!\n";
+                staffDB[stfidx].passwordStaff = newPass;
+                cout << GREEN << "\n[Success] Password updated successfully for Staff ID '" << RESET << idStaff << RED << "'!\n" << RESET;
                 break;
             }
-            case 4: {
+            case 4: { //change position
                 string newPos;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Enter new Hair Salon Position: ";
                 getline(cin, newPos);
-                staffDB[idx].positionStaff = newPos;
-                cout << "\n[Success] Position updated successfully for Staff ID '" << idStaff << "'!\n";
+                staffDB[stfidx].positionStaff = newPos;
+                cout << GREEN << "\n[Success] Position updated successfully for Staff ID '" << RESET << idStaff << GREEN << "'!\n" << RESET;
                 break;
             }
             default:
-                cout << "\n[Error] Invalid option selected. Update canceled.\n";
+                cout << RED << "\n[Error] Invalid option selected. Update canceled.\n" << RESET; // if does not in option,update cancel
             }
             break;
         }
         default:
-            cout << "Invalid option. Please enter 1 to 5.\n";
+            cout << RED << "Invalid option. Please enter 1 to 5.\n" << RESET;
         }
     }
 }
-
+//show customer and member table
 void showMemberCustomerList() {
     cout << right << setw(75) << "< TABLE MEMBER & CUSTOMER >" << endl;
 
@@ -1073,7 +1097,7 @@ void showMemberCustomerList() {
         << " | " << setw(20) << "Password" << " |\n";
 
     cout << border << "\n";
-
+    //member will be the topper
     for (int i = 0; i < memberCount; ++i) {
         cout << "| " << left << setw(8) << memberDB[i].idMember
             << " | " << setw(22) << memberDB[i].nameMember
@@ -1083,7 +1107,7 @@ void showMemberCustomerList() {
             << " | " << setw(20) << memberDB[i].passwordMember << " |\n";
         cout << border << "\n";
     }
-
+    //customer will be at the buttom
     for (int i = 0; i < customerCount; ++i) {
         cout << "| " << left << setw(8) << customerDB[i].idCustomer
             << " | " << setw(22) << customerDB[i].nameCustomer
@@ -1108,11 +1132,11 @@ void memberManagement() {
 
         if (!(cin >> choice)) {
             clearInput();
-            cout << "Invalid input. Please enter a valid number.\n";
+            cout << RED << "Invalid input. Please enter a valid number.\n" << RESET;
             continue;
         }
 
-        if (choice == 5) {
+        if (choice == 5) { // if click 5 will back to staff control panel
             cout << "Returning to Staff Control Panel...\n";
             break;
         }
@@ -1126,7 +1150,7 @@ void memberManagement() {
         case 2: {
             cout << "\nEnter Customer/Member ID to search: ";
             cin >> id;
-
+            //enter customer or mrmber id
             int memIdx = findMemberIndex(id);
             if (memIdx != -1) {
                 cout << "\n[Found] ID: " << memberDB[memIdx].idMember
@@ -1143,7 +1167,7 @@ void memberManagement() {
                         << " | Email: " << customerDB[custIdx].emailCustomer << "\n";
                 }
                 else {
-                    cout << "\n[Error] Member/Customer ID '" << id << "' not found.\n";
+                    cout << RED << "\n[Error] Member/Customer ID '" << RESET << id << RED << "' not found.\n" << RESET;
                 }
             }
             break;
@@ -1151,26 +1175,26 @@ void memberManagement() {
         case 3: {
             cout << "\nEnter Customer/Member ID to delete: ";
             cin >> id;
-
-            int memIdx = findMemberIndex(id);
+            //Staff enter Customer or Member ID
+            int memIdx = findMemberIndex(id);//if enter member id will find member data
             if (memIdx != -1) {
                 for (int i = memIdx; i < memberCount - 1; ++i) {
                     memberDB[i] = memberDB[i + 1];
                 }
                 memberCount--;
-                cout << "\n[Success] Member '" << id << "' deleted successfully.\n";
+                cout << GREEN << "\n[Success] Member '" << RESET << id << GREEN << "' deleted successfully.\n" << RESET;
             }
             else {
-                int custIdx = findCustomerIndex(id);
+                int custIdx = findCustomerIndex(id);//if enter customer id will find customer data
                 if (custIdx != -1) {
                     for (int i = custIdx; i < customerCount - 1; ++i) {
                         customerDB[i] = customerDB[i + 1];
                     }
                     customerCount--;
-                    cout << "\n[Success] Customer '" << id << "' deleted successfully.\n";
+                    cout << GREEN << "\n[Success] Customer '" << RESET << id << GREEN << "' deleted successfully.\n" << RESET;
                 }
-                else {
-                    cout << "\n[Error] ID '" << id << "' not found. Delete canceled.\n";
+                else { //if no found
+                    cout << RED << "\n[Error] ID '" << RESET << id << RED << "' not found. Delete canceled.\n" << RESET;
                 }
             }
             break;
@@ -1183,7 +1207,7 @@ void memberManagement() {
             int custIdx = findCustomerIndex(id);
 
             if (memIdx == -1 && custIdx == -1) {
-                cout << "\n[Error] ID '" << id << "' not found. Update canceled.\n";
+                cout << RED << "\n[Error] ID '" << RESET << id << RED << "' not found. Update canceled.\n" << RESET;
                 break;
             }
 
@@ -1196,7 +1220,7 @@ void memberManagement() {
             int updateChoice = 0;
             if (!(cin >> updateChoice)) {
                 clearInput();
-                cout << "[Error] Invalid selection. Update canceled.\n";
+                cout << RED << "[Error] Invalid selection. Update canceled.\n" << RESET;
                 break;
             }
             if (updateChoice == 3) {
@@ -1206,34 +1230,34 @@ void memberManagement() {
             switch (updateChoice) {
             case 1: {
                 string newEmail;
-                while (true) {
+                while (true) { // change email
                     cout << "Enter new Email Address (must end with @gmail.com): ";
                     cin >> newEmail;
                     if (isValidEmail(newEmail)) break;
-                    cout << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n";
+                    cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
                 }
                 if (memIdx != -1) memberDB[memIdx].emailMember = newEmail;
                 else customerDB[custIdx].emailCustomer = newEmail;
-                cout << "\n[Success] Email updated successfully for ID '" << id << "'!\n";
+                cout << GREEN << "\n[Success] Email updated successfully for ID '" << RESET << id << GREEN << "'!\n" << RESET;
                 break;
             }
-            case 2: {
+            case 2: { //change new phone number
                 string newPhone;
                 cout << "Enter new Phone Number (e.g.: xxx-xxxxxxxx): ";
                 cin >> newPhone;
                 if (memIdx != -1) memberDB[memIdx].phoneMember = newPhone;
                 else customerDB[custIdx].phoneCustomer = newPhone;
-                cout << "\n[Success] Phone number updated successfully for ID '" << id << "'!\n";
+                cout << GREEN << "\n[Success] Phone number updated successfully for ID '" << RESET << id << RED << "'!\n" << RESET;
                 break;
             }
 
             default:
-                cout << "\n[Error] Invalid option selected. Update canceled.\n";
+                cout << RED << "\n[Error] Invalid option selected. Update canceled.\n" << RESET;
             }
             break;
         }
         default:
-            cout << "Invalid option. Please enter 1 to 5.\n";
+            cout << RED << "Invalid option. Please enter 1 to 5.\n" << RESET;
         }
     }
 }
@@ -1243,7 +1267,7 @@ void AppointmentStaff() {
     initMonthlySchedule();
 
     int option = 0;
-    
+
     do {
         cout << "\nWelcome to the Appointment Scheduler!\n" << endl;
         cout << "Please select an option from the menu below:" << endl;
@@ -1391,7 +1415,7 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         if (!filterStaffID.empty() && schedule[i].staffID != filterStaffID && schedule[i].isBooked) {
             continue;
         }
-        
+
         string AppointmentIDStr = schedule[i].isBooked ? schedule[i].appointmentID : "-";
         string statusStr = schedule[i].isBooked ? schedule[i].status : "Available";
         string staffIDStr = schedule[i].isBooked ? schedule[i].staffID : "-";
@@ -1488,7 +1512,7 @@ void getCurrentSystemTime(int& year, int& month, int& day, int& hour) {
 //appointmentID counter
 string generateAppointmentID() {
     string newID = "APT" + to_string(appointmentCounter);
-    appointmentCounter++; 
+    appointmentCounter++;
     return newID;
 }
 
@@ -2052,7 +2076,7 @@ void ViewStaffSchedule() {
                         << "|" << endl;
                 }
             }
-        } 
+        }
 
         cout << separator << endl;
 
