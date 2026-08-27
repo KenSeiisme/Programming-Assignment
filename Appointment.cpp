@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <utility>
 #include <ctime>
+#include <sstream>
 
 using namespace std;
 
@@ -53,6 +54,7 @@ struct Timeslot {
     string customerName;
     string service;
     string status;
+    double price;
 };
 
 // Global ID counters
@@ -74,13 +76,13 @@ const int TOTAL_SLOTS = 7;
 const int DAYS_IN_MONTH = 31;
 
 Timeslot defaultDaySlots[TOTAL_SLOTS] = {
-    {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", ""},
-    {2, "11:00 AM - 01:00 PM", "", false, "", "", "", "", "", ""},
-    {3, "01:00 PM - 03:00 PM", "", false, "", "", "", "", "", ""},
-    {4, "03:00 PM - 05:00 PM", "", false, "", "", "", "", "", ""},
-    {5, "05:00 PM - 07:00 PM", "", false, "", "", "", "", "", ""},
-    {6, "07:00 PM - 09:00 PM", "", false, "", "", "", "", "", ""},
-    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", ""}
+    {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", "", 0},
+    {2, "11:00 AM - 01:00 PM", "", false, "", "", "", "", "", "", 0},
+    {3, "01:00 PM - 03:00 PM", "", false, "", "", "", "", "", "", 0},
+    {4, "03:00 PM - 05:00 PM", "", false, "", "", "", "", "", "", 0},
+    {5, "05:00 PM - 07:00 PM", "", false, "", "", "", "", "", "", 0},
+    {6, "07:00 PM - 09:00 PM", "", false, "", "", "", "", "", "", 0},
+    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
 };
 
 Timeslot schedule[DAYS_IN_MONTH][TOTAL_SLOTS];
@@ -820,7 +822,7 @@ void staffLogin() {
     //check the id and password same as the database
     int stfidx = findStaffIndex(idStaff);
     if (stfidx != -1 && staffDB[stfidx].passwordStaff == passStaff) {
-        cout << RED << "\nStaff authentication successful!\n" << RESET;
+        cout << GREEN << "\nStaff authentication successful!\n" << RESET;
         cout << GREEN << "Welcome, " << staffDB[stfidx].nameStaff << " (" << staffDB[stfidx].positionStaff << ")!\n" << RESET;
         showStaffUI(idStaff);
     }
@@ -1408,6 +1410,7 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
     int w_custID = string("Customer ID").length();
     int w_custName = string("Customer Name").length();
     int w_service = string("Service").length();
+    int w_price = string("Price (RM)").length();
 
     for (int i = 0; i < size; i++) {
         if (!filterStaffID.empty() && schedule[i].staffID != filterStaffID && schedule[i].isBooked) {
@@ -1421,6 +1424,9 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         string custIDStr = schedule[i].isBooked ? schedule[i].customerID : "-";
         string custNameStr = schedule[i].isBooked ? schedule[i].customerName : "-";
         string serviceStr = (schedule[i].isBooked && !schedule[i].service.empty()) ? schedule[i].service : "-";
+        //ostringsteam to compare number value with string value
+        string priceStr = schedule[i].isBooked ? (ostringstream() << fixed << setprecision(2) << schedule[i].price).str() : "-";
+
 
         //find table width
         w_num = max(w_num, (int)to_string(schedule[i].num).length());
@@ -1432,6 +1438,7 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         w_custID = max(w_custID, (int)custIDStr.length());
         w_custName = max(w_custName, (int)custNameStr.length());
         w_service = max(w_service, (int)serviceStr.length());
+        w_price = max(w_price, (int)priceStr.length());
     }
 
     string separator
@@ -1443,7 +1450,8 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         + "+" + string(w_staffName + 2, '-')
         + "+" + string(w_custID + 2, '-')
         + "+" + string(w_custName + 2, '-')
-        + "+" + string(w_service + 2, '-') + "+";
+        + "+" + string(w_service + 2, '-') 
+        + "+" + string(w_price + 2, '-') + "+";
 
     //header
     cout << separator << endl;
@@ -1455,7 +1463,8 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         << "| " << setw(w_staffName) << "Staff Name" << " "
         << "| " << setw(w_custID) << "Customer ID" << " "
         << "| " << setw(w_custName) << "Customer Name" << " "
-        << "| " << setw(w_service) << "Service" << " |\n";
+        << "| " << setw(w_service) << "Service" << " "
+        << "| " << setw(w_price) << "Price (RM)" << " |\n";
 
     cout << separator << endl;
 
@@ -1483,6 +1492,8 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
         string customerID = schedule[i].isBooked ? schedule[i].customerID : "-";
         string customerName = schedule[i].isBooked ? schedule[i].customerName : "-";
         string service = (schedule[i].isBooked && !schedule[i].service.empty()) ? schedule[i].service : "-";
+        //ostringsteam to compare number value with string value
+        string price = schedule[i].isBooked ? (ostringstream() << fixed << setprecision(2) << schedule[i].price).str() : "-";
 
         cout << "| " << left << setw(w_num) << schedule[i].num << " "
             << "| " << setw(w_time) << schedule[i].time << " "
@@ -1493,6 +1504,7 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
             << "| " << setw(w_custID) << customerID << " "
             << "| " << setw(w_custName) << customerName << " "
             << "| " << setw(w_service) << service << " "
+            << "| " << setw(w_price) << price << " "
             << "|" << endl;
     }
     cout << separator << endl;
@@ -1642,9 +1654,11 @@ void CreateAppointmentStaff() {
     switch (Appointmentoption) {
     case 1:
         schedule[dayIndex][slotIndex].service = "Wedding Event";
+        schedule[dayIndex][slotIndex].price = 500.00;
         break;
     case 2:
         schedule[dayIndex][slotIndex].service = "Hair dressing with make up";
+        schedule[dayIndex][slotIndex].price = 150.00;
         break;
     default:
         // FIXED: Added return to avoid booking slot with an invalid service
@@ -1670,6 +1684,7 @@ void CreateAppointmentStaff() {
     cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
     cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
     cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+    cout << "Price       : RM " << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price << endl;
     cout << "----------------------------------" << endl;
     cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
 }
@@ -1765,9 +1780,11 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     switch (Appointmentoption) {
     case 1:
         schedule[dayIndex][slotIndex].service = "Wedding Event";
+        schedule[dayIndex][slotIndex].price = 500.00;
         break;
     case 2:
         schedule[dayIndex][slotIndex].service = "Hair dressing with make up";
+        schedule[dayIndex][slotIndex].price = 150.00;
         break;
     default:
         cout << RED << "[Error] Invalid service option. Booking canceled." << RESET << endl;
@@ -1791,6 +1808,7 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
     cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
     cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
+    cout << "Price       : RM " << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price << endl;
     cout << "----------------------------------" << endl;
     cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
 }
@@ -1957,6 +1975,7 @@ void RescheduleAppointment(const string& currentUserId) {
                 schedule[newDayIndex][newSlotIndex].staffID = schedule[dayIndex][slotIndex].staffID;
                 schedule[newDayIndex][newSlotIndex].staffName = schedule[dayIndex][slotIndex].staffName;
                 schedule[newDayIndex][newSlotIndex].service = schedule[dayIndex][slotIndex].service;
+                schedule[newDayIndex][newSlotIndex].price = schedule[dayIndex][slotIndex].price;
                 schedule[newDayIndex][newSlotIndex].status = "Booked";
                 schedule[newDayIndex][newSlotIndex].isBooked = true;
 
@@ -1969,6 +1988,7 @@ void RescheduleAppointment(const string& currentUserId) {
                 schedule[dayIndex][slotIndex].staffID = "-";
                 schedule[dayIndex][slotIndex].staffName = "-";
                 schedule[dayIndex][slotIndex].service = "-";
+                schedule[dayIndex][slotIndex].price = 0;
 
                 cout << GREEN << "\n[Success] Appointment " << targetID << " has been rescheduled successfully!" << RESET << endl;
                 return;
@@ -2035,18 +2055,21 @@ void ViewStaffSchedule() {
         int w_custID = string("Customer ID").length();
         int w_custName = string("Customer Name").length();
         int w_service = string("Service").length();
+        int w_price = string("Price (RM)").length();
 
         //find table width
         for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
             for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
                 if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].staffID == targetStaffID) {
                     string dayStr = "Day " + to_string(dayIndex + 1);
+                    string priceStr = (ostringstream() << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price).str();
                     w_day = max(w_day, (int)dayStr.length());
                     w_time = max(w_time, (int)schedule[dayIndex][slotIndex].time.length());
                     w_id = max(w_id, (int)schedule[dayIndex][slotIndex].appointmentID.length());
                     w_custID = max(w_custID, (int)schedule[dayIndex][slotIndex].customerID.length());
                     w_custName = max(w_custName, (int)schedule[dayIndex][slotIndex].customerName.length());
                     w_service = max(w_service, (int)schedule[dayIndex][slotIndex].service.length());
+                    w_price = max(w_price, (int)priceStr.length());
                 }
             }
         }
@@ -2057,7 +2080,8 @@ void ViewStaffSchedule() {
             + "+" + string(w_id + 2, '-')
             + "+" + string(w_custID + 2, '-')
             + "+" + string(w_custName + 2, '-')
-            + "+" + string(w_service + 2, '-') + "+";
+            + "+" + string(w_service + 2, '-') 
+            + "+" + string(w_price + 2, '-') + "+";
 
         //header
         cout << separator << endl;
@@ -2066,7 +2090,8 @@ void ViewStaffSchedule() {
             << "| " << setw(w_id) << "Appointment ID" << " "
             << "| " << setw(w_custID) << "Customer ID" << " "
             << "| " << setw(w_custName) << "Customer Name" << " "
-            << "| " << setw(w_service) << "Service" << " |\n";
+            << "| " << setw(w_service) << "Service" << " "
+            << "| " << setw(w_price) << "Price (RM)" << " |\n";
         cout << separator << endl;
 
         for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
@@ -2081,6 +2106,7 @@ void ViewStaffSchedule() {
                         << "| " << setw(w_custID) << schedule[dayIndex][slotIndex].customerID << " "
                         << "| " << setw(w_custName) << schedule[dayIndex][slotIndex].customerName << " "
                         << "| " << setw(w_service) << schedule[dayIndex][slotIndex].service << " "
+                        << "| " << setw(w_price) << schedule[dayIndex][slotIndex].price << " "
                         << "|" << endl;
                 }
             }
