@@ -158,7 +158,7 @@ void CancelAppointment(const string& currentUserId = "");
 void RescheduleAppointment(const string& currentUserId = "");
 void ViewStaffSchedule();
 void AppointmentMarking();
-void initMonthlySchedule();
+void inMonthlySchedule();
 
 int main() {
     logo();
@@ -1263,7 +1263,7 @@ void memberManagement() {
 
 void AppointmentStaff() {
 
-    initMonthlySchedule();
+    inMonthlySchedule();
 
     int option = 0;
 
@@ -1346,7 +1346,7 @@ void AppointmentStaff() {
 
 void AppointmentCustomer(const string& currentUserId, const string& currentUserName) {
 
-    initMonthlySchedule();
+    inMonthlySchedule();
 
     int option = 0;
 
@@ -1510,7 +1510,7 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
     cout << separator << endl;
 }
 
-void initMonthlySchedule() {
+void inMonthlySchedule() {
     for (int day = 0; day < DAYS_IN_MONTH; day++) {
         for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
             schedule[day][slot] = defaultDaySlots[slot];
