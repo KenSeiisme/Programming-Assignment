@@ -203,11 +203,28 @@ bool isValidName(const string& name) {
 }
 
 bool isValidPhoneNumber(const string& phone) {
-    if (phone.empty()) return false;
-    if (phone.find('-') == string::npos) return false;
-    for (char c : phone) {
-        if (!isdigit(c) && c != '-' && !isspace(c)) return false;
+    // Find position of the dash
+    size_t dashPos = phone.find('-');
+
+    // Dash must exist and be at index 3 (exactly 3 digits before it)
+    if (dashPos != 3) return false;
+
+    // Ensure there are no additional dashes
+    if (phone.rfind('-') != 3) return false;
+
+    // Verify the first 3 characters are digits
+    for (int i = 0; i < 3; ++i) {
+        if (!isdigit(phone[i])) return false;
     }
+
+    // Verify there is content after the dash
+    if (phone.length() <= 4) return false;
+
+    // Verify all characters after the dash are digits
+    for (size_t i = 4; i < phone.length(); ++i) {
+        if (!isdigit(phone[i])) return false;
+    }
+
     return true;
 }
 
@@ -776,9 +793,12 @@ void registerStaff() {
     int posChoice = 0;
     while (true) {
         cout << "\nWhat position do you want to hire for?\n";
-        cout << "[ 1 ] Hair Stylist\n[ 2 ] Skincare Specialist\n[ 3 ] Hair Color Stylist\n[ 4 ] Nail Technician\n[ 5 ] Receptionist\n";
+        cout << "[ 1 ] Hair Stylist\n";
+        cout << "[ 2 ] Skincare Specialist\n";
+        cout << "[ 3 ] Hair Color Stylist\n";
+        cout << "[ 4 ] Nail Technician\n";
+        cout << "[ 5 ] Receptionist\n";
         cout << "Select position (1-5): ";
-
         if (cin >> posChoice && posChoice >= 1 && posChoice <= 5) {
             clearInput();
             switch (posChoice) {
@@ -1062,13 +1082,37 @@ void staffManagement() {
                 cout << GREEN << "\n[Success] Password updated successfully for Staff ID '" << RESET << idStaff << RED << "'!\n" << RESET;
                 break;
             }
+            //update staff area
             case 4: { //change position
-                string newPos;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Enter new Hair Salon Position: ";
-                getline(cin, newPos);
-                staffDB[stfidx].positionStaff = newPos;
-                cout << GREEN << "\n[Success] Position updated successfully for Staff ID '" << RESET << idStaff << GREEN << "'!\n" << RESET;
+                int posChoice = 0;
+                while (true) {
+                    cout << "\nSelect new Hair Salon Position:\n";
+                    cout << "[ 1 ] Hair Stylist\n";
+                    cout << "[ 2 ] Skincare Specialist\n";
+                    cout << "[ 3 ] Hair Color Stylist\n";
+                    cout << "[ 4 ] Nail Technician\n";
+                    cout << "[ 5 ] Receptionist\n";
+                    cout << "Select position (1-5): ";
+
+                    if (cin >> posChoice && posChoice >= 1 && posChoice <= 5) {
+                        clearInput();
+                        switch (posChoice) {
+                        case 1: staffDB[stfidx].positionStaff = "Hair Stylist"; break;
+                        case 2: staffDB[stfidx].positionStaff = "Skincare Specialist"; break;
+                        case 3: staffDB[stfidx].positionStaff = "Hair Color Stylist"; break;
+                        case 4: staffDB[stfidx].positionStaff = "Nail Technician"; break;
+                        case 5: staffDB[stfidx].positionStaff = "Receptionist"; break;
+                        }
+                        cout << GREEN << "\n[Success] Position updated successfully to '"
+                            << staffDB[stfidx].positionStaff << "' for Staff ID '"
+                            << RESET << idStaff << GREEN << "'!\n" << RESET;
+                        break;
+                    }
+                    else {
+                        clearInput();
+                        cout << RED << "[Error] Invalid position selection. Please enter a number between 1 and 5.\n" << RESET;
+                    }
+                }
                 break;
             }
             default:
