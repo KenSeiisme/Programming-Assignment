@@ -74,7 +74,9 @@ int staffCount = 10;
 
 // Total slots and days in month
 const int TOTAL_SLOTS = 7;
+const int MONTH_IN_YEAR = 12;
 const int DAYS_IN_MONTH = 31;
+const int daysInMonth[MONTH_IN_YEAR] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 Timeslot defaultDaySlots[TOTAL_SLOTS] = {
     {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", "", 0},
@@ -86,7 +88,7 @@ Timeslot defaultDaySlots[TOTAL_SLOTS] = {
     {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
 };
 
-Timeslot schedule[DAYS_IN_MONTH][TOTAL_SLOTS];
+Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];
 
 // Color word for appointment
 const string RESET = "\033[0m";
@@ -162,7 +164,7 @@ void CancelAppointment(const string& currentUserId = "");
 void RescheduleAppointment(const string& currentUserId = "");
 void ViewStaffSchedule();
 void AppointmentMarking();
-void inMonthlySchedule();
+void inYearlySchedule();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Reporting - CAI XUAN
 void loadDataFromTeamSystem();
@@ -176,7 +178,7 @@ void reportingMenu();
 
 int main() {
     logo();
-    inMonthlySchedule();
+    inYearlySchedule();
     LoadScheduleFromFile();
     mainMenu();
     return 0;
@@ -1324,39 +1326,43 @@ void memberManagement() {
 }
 
 //give a clear 31 day with 7 slot timeslot
-void inMonthlySchedule() {
-    for (int day = 0; day < DAYS_IN_MONTH; day++) {
-        for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
-            schedule[day][slot] = defaultDaySlots[slot];
+void inYearlySchedule() {
+    for (int month = 0; month < 12; month++) {
+        for (int day = 0; day < 31; day++) {
+            for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
+                schedule[month][day][slot] = defaultDaySlots[slot];
+            }
         }
     }
 }
 
 void SaveScheduleToFile() {
     //save in schedule.txt
-    ofstream outFile("schedule.txt");
+    ofstream outFile("schedule_data.txt");
     if (!outFile) {
         cout << RED << "[Error] Failed to save data to file!" << RESET << endl;
         return;
     }
 
     //layout
-    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
-        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
-            //initialize the slot of the day
-            const Timeslot& slot = schedule[dayIndex][slotIndex];
+    for (int monthIndex = 0; monthIndex < 12; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+                //initialize the slot of the day
 
-            outFile << dayIndex << "|"
-                << slotIndex << "|"
-                << slot.isBooked << "|"
-                << slot.appointmentID << "|"
-                << slot.status << "|"
-                << slot.staffID << "|"
-                << slot.staffName << "|"
-                << slot.customerID << "|"
-                << slot.customerName << "|"
-                << slot.service << "|"
-                << slot.price << "\n";
+                outFile << monthIndex << "|"
+                    << dayIndex << "|"
+                    << slotIndex << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].isBooked << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].appointmentID << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].status << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].staffID << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].staffName << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].customerID << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].customerName << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].service << "|"
+                    << schedule[monthIndex][dayIndex][slotIndex].price << "\n";
+            }
         }
     }
     outFile.close();
@@ -1364,7 +1370,7 @@ void SaveScheduleToFile() {
 
 //load schedule
 void LoadScheduleFromFile() {
-    ifstream inFile("schedule.txt");
+    ifstream inFile("schedule_data.txt");
     if (!inFile) {
         // run directly(create file) if didnt exist
         return;
@@ -1377,27 +1383,29 @@ void LoadScheduleFromFile() {
         stringstream slotdata(line);
         string item;
 
-        int dayIndex, slotIndex;
+        int monthIndex, dayIndex, slotIndex;
+        getline(slotdata, item, '|'); monthIndex = stoi(item);
         getline(slotdata, item, '|'); dayIndex = stoi(item);
         getline(slotdata, item, '|'); slotIndex = stoi(item);
 
-        Timeslot& slot = schedule[dayIndex][slotIndex];
-
-        getline(slotdata, item, '|'); slot.isBooked = (item == "1");
-        getline(slotdata, slot.appointmentID, '|');
-        getline(slotdata, slot.status, '|');
-        getline(slotdata, slot.staffID, '|');
-        getline(slotdata, slot.staffName, '|');
-        getline(slotdata, slot.customerID, '|');
-        getline(slotdata, slot.customerName, '|');
-        getline(slotdata, slot.service, '|');
+        getline(slotdata, item, '|'); schedule[monthIndex][dayIndex][slotIndex].isBooked = (item == "1");
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].appointmentID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].status, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].staffID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].staffName, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].customerID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].customerName, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].service, '|');
         getline(slotdata, item, '|');
-        slot.price = item.empty() ? 0.0 : stod(item);
+        schedule[monthIndex][dayIndex][slotIndex].price = item.empty() ? 0.0 : stod(item);
     }
     inFile.close();
 }
 
 void AppointmentStaff() {
+
+    int curYear, curMonth, curDay, curHour;
+    getCurrentSystemTime(curYear, curMonth, curDay, curHour);
 
     int option = 0;
 
@@ -1427,8 +1435,21 @@ void AppointmentStaff() {
 
         switch (option) {
         case 1: {
+            int month;
+            cout << "Enter month (1 - 12): ";
+            cin >> month;
+            if (cin.fail() || month < 1 || month > 12) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << RED << "[Error] Invalid day! Please enter a day from 1 to 31." << RESET << endl;
+                break;
+            }
+
+            int monthIndex = month - 1;
+
             int day;
-            cout << "Enter day (1 to 31): ";
+            int maxDays = daysInMonth[month];
+            cout << "Enter Day of the Month (1 - " << maxDays << "): ";
             cin >> day;
             if (cin.fail() || day < 1 || day > 31) {
                 cin.clear();
@@ -1438,8 +1459,8 @@ void AppointmentStaff() {
             }
 
             int dayIndex = day - 1;
-            cout << "You selected: View All Appointment for Day " << day << endl;
-            ViewAllAppointment(schedule[dayIndex], TOTAL_SLOTS);
+            cout << "You selected: View All Appointment for Date:  " << day << month << curYear <<endl;
+            ViewAllAppointment(schedule[monthIndex][dayIndex], TOTAL_SLOTS);
             break;
         }
         case 2:
@@ -1698,27 +1719,44 @@ void CreateAppointmentStaff() {
     getCurrentSystemTime(curYear, curMonth, curDay, curHour);
     cout << "Today is: " << curYear << "-" << curMonth << "-" << curDay << endl;
 
-    int dayOption;
-    cout << "Enter Day of the Month (1 - 31): ";
-    cin >> dayOption;
+    int monthOption, dayOption;
 
-    //check day
-    if (cin.fail() || dayOption < 1 || dayOption > 31) {
+    //Enter Month
+    cout << "Enter Month (1 - 12): ";
+    cin >> monthOption;
+
+    if (cin.fail() || monthOption < 1 || monthOption > 12) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << RED << "\n[Error] Invalid day input!" << RESET << endl;
+        cout << RED << "[Error] Invalid month!" << RESET << endl;
         return;
     }
 
+    int monthIndex = monthOption - 1;
+
+    //Enter day
+    int maxDays = daysInMonth[monthIndex];
+    cout << "Enter Day of the Month (1 - " << maxDays << "): ";
+    cin >> dayOption;
+
+    if (cin.fail() || dayOption < 1 || dayOption > maxDays) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid day for this month!" << RESET << endl;
+        return;
+    }
+
+    int dayIndex = dayOption - 1;
+
     //pass day cant book
-    if (dayOption < curDay) {
+    if (monthOption < curMonth || (monthOption == curMonth && dayOption < curDay)) {
         cout << RED << "\n[Error] Cannot book appointments for past dates!" << RESET << endl;
         return;
     }
 
     //open the day customer input
-    int dayIndex = dayOption - 1;
-    ViewAllAppointment(schedule[dayIndex], TOTAL_SLOTS);
+
+    ViewAllAppointment(schedule[monthIndex][dayIndex], TOTAL_SLOTS);
 
     //input time
     int Appointment_time;
@@ -1743,7 +1781,7 @@ void CreateAppointmentStaff() {
     }
 
     //cant book duplicate
-    if (schedule[dayIndex][slotIndex].isBooked) {
+    if (schedule[monthIndex][dayIndex][slotIndex].isBooked) {
         cout << RED << "\n[Sorry] Timeslot is already booked!" << RESET << endl;
         return;
     }
@@ -1784,36 +1822,36 @@ void CreateAppointmentStaff() {
 
     switch (Appointmentoption) {
     case 1:
-        schedule[dayIndex][slotIndex].service = "Wedding Event";
-        schedule[dayIndex][slotIndex].price = 500.00;
+        schedule[monthIndex][dayIndex][slotIndex].service = "Wedding Event";
+        schedule[monthIndex][dayIndex][slotIndex].price = 500.00;
         break;
     case 2:
-        schedule[dayIndex][slotIndex].service = "Hair dressing with make up";
-        schedule[dayIndex][slotIndex].price = 150.00;
+        schedule[monthIndex][dayIndex][slotIndex].service = "Hair dressing with make up";
+        schedule[monthIndex][dayIndex][slotIndex].price = 150.00;
         break;
     } 
     //intepret data to timeslot
     int selectedIndex = staffoption - 1;
 
-    schedule[dayIndex][slotIndex].appointmentID = generateAppointmentID();
-    schedule[dayIndex][slotIndex].staffID = staffDB[selectedIndex].idStaff;
-    schedule[dayIndex][slotIndex].staffName = staffDB[selectedIndex].nameStaff;
-    schedule[dayIndex][slotIndex].customerID = customerID;
-    schedule[dayIndex][slotIndex].customerName = customerName;
-    schedule[dayIndex][slotIndex].status = "Booked";
-    schedule[dayIndex][slotIndex].isBooked = true;
+    schedule[monthIndex][dayIndex][slotIndex].appointmentID = generateAppointmentID();
+    schedule[monthIndex][dayIndex][slotIndex].staffID = staffDB[selectedIndex].idStaff;
+    schedule[monthIndex][dayIndex][slotIndex].staffName = staffDB[selectedIndex].nameStaff;
+    schedule[monthIndex][dayIndex][slotIndex].customerID = customerID;
+    schedule[monthIndex][dayIndex][slotIndex].customerName = customerName;
+    schedule[monthIndex][dayIndex][slotIndex].status = "Booked";
+    schedule[monthIndex][dayIndex][slotIndex].isBooked = true;
     SaveScheduleToFile();
 
-    cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[dayIndex][slotIndex].time << "!" << RESET << endl;
+    cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[monthIndex][dayIndex][slotIndex].time << "!" << RESET << endl;
     cout << "\n------- Appointment Detail -------" << endl;
-    cout << "Day         : Day " << (dayIndex + 1) << endl;
-    cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
-    cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
-    cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
-    cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
-    cout << "Price       : RM " << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price << endl;
+    cout << "Date        : " << (dayIndex + 1) << "-" << monthIndex + 1 << "-" << curYear << endl;
+    cout << "Time Slot   : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+    cout << "Customer    : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+    cout << "Staff       : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+    cout << "Service     : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+    cout << "Price       : RM " << fixed << setprecision(2) << schedule[monthIndex][dayIndex][slotIndex].price << endl;
     cout << "----------------------------------" << endl;
-    cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
+    cout << "Your Appointment ID is: " << YELLOW << schedule[monthIndex][dayIndex][slotIndex].appointmentID << RESET << endl;
 }
 
 void CreateAppointmentCustomer(const string& customerID, const string& customerName) {
@@ -1827,27 +1865,44 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     getCurrentSystemTime(curYear, curMonth, curDay, curHour);
     cout << "Today is: " << curYear << "-" << curMonth << "-" << curDay << endl;
 
-    int dayOption;
-    cout << "Enter Day of the Month (1 - 31): ";
-    cin >> dayOption;
+    int monthOption, dayOption;
 
-    //check day
-    if (cin.fail() || dayOption < 1 || dayOption > 31) {
+    //Enter Month
+    cout << "Enter Month (1 - 12): ";
+    cin >> monthOption;
+
+    if (cin.fail() || monthOption < 1 || monthOption > 12) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << RED << "\n[Error] Invalid day input!" << RESET << endl;
+        cout << RED << "[Error] Invalid month!" << RESET << endl;
         return;
     }
 
+    int monthIndex = monthOption - 1;
+
+    //Enter day
+    int maxDays = daysInMonth[monthIndex];
+    cout << "Enter Day of the Month (1 - " << maxDays << "): ";
+    cin >> dayOption;
+
+    if (cin.fail() || dayOption < 1 || dayOption > maxDays) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid day for this month!" << RESET << endl;
+        return;
+    }
+
+    int dayIndex = dayOption - 1;
+
     //pass day cant book
-    if (dayOption < curDay) {
+    if (monthOption < curMonth || (monthOption == curMonth && dayOption < curDay)) {
         cout << RED << "\n[Error] Cannot book appointments for past dates!" << RESET << endl;
         return;
     }
 
     //open the day customer input
-    int dayIndex = dayOption - 1;
-    ViewAllAppointment(schedule[dayIndex], TOTAL_SLOTS);
+
+    ViewAllAppointment(schedule[monthIndex][dayIndex], TOTAL_SLOTS);
 
     //input time
     int Appointment_time;
@@ -1871,7 +1926,7 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
     }
 
     //cant book duplicate
-    if (schedule[dayIndex][slotIndex].isBooked) {
+    if (schedule[monthIndex][dayIndex][slotIndex].isBooked) {
         cout << RED << "\n[Sorry] Timeslot is already booked!" << RESET << endl;
         return;
     }
@@ -1906,12 +1961,12 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
 
     switch (Appointmentoption) {
     case 1:
-        schedule[dayIndex][slotIndex].service = "Wedding Event";
-        schedule[dayIndex][slotIndex].price = 500.00;
+        schedule[monthIndex][dayIndex][slotIndex].service = "Wedding Event";
+        schedule[monthIndex][dayIndex][slotIndex].price = 500.00;
         break;
     case 2:
-        schedule[dayIndex][slotIndex].service = "Hair dressing with make up";
-        schedule[dayIndex][slotIndex].price = 150.00;
+        schedule[monthIndex][dayIndex][slotIndex].service = "Hair dressing with make up";
+        schedule[monthIndex][dayIndex][slotIndex].price = 150.00;
         break;
     default:
         cout << RED << "[Error] Invalid service option. Booking canceled." << RESET << endl;
@@ -1920,25 +1975,25 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
 
     //intepret data to timeslot
     int selectedIndex = staffOption - 1;
-    schedule[dayIndex][slotIndex].appointmentID = generateAppointmentID();
-    schedule[dayIndex][slotIndex].staffID = staffDB[selectedIndex].idStaff;
-    schedule[dayIndex][slotIndex].staffName = staffDB[selectedIndex].nameStaff;
-    schedule[dayIndex][slotIndex].customerID = customerID;
-    schedule[dayIndex][slotIndex].customerName = customerName;
-    schedule[dayIndex][slotIndex].status = "Booked";
-    schedule[dayIndex][slotIndex].isBooked = true;
+    schedule[monthIndex][dayIndex][slotIndex].appointmentID = generateAppointmentID();
+    schedule[monthIndex][dayIndex][slotIndex].staffID = staffDB[selectedIndex].idStaff;
+    schedule[monthIndex][dayIndex][slotIndex].staffName = staffDB[selectedIndex].nameStaff;
+    schedule[monthIndex][dayIndex][slotIndex].customerID = customerID;
+    schedule[monthIndex][dayIndex][slotIndex].customerName = customerName;
+    schedule[monthIndex][dayIndex][slotIndex].status = "Booked";
+    schedule[monthIndex][dayIndex][slotIndex].isBooked = true;
     SaveScheduleToFile();
 
-    cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[dayIndex][slotIndex].time << "!" << RESET << endl;
+    cout << GREEN << "\n[Success] Appointment successfully created for Timeslot " << schedule[monthIndex][dayIndex][slotIndex].time << "!" << RESET << endl;
     cout << "\n------- Appointment Detail -------" << endl;
-    cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
-    cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
-    cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
-    cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
-    cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
-    cout << "Price       : RM " << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price << endl;
+    cout << "Date        : " << (dayIndex + 1) << "-" << monthIndex + 1 << "-" << curYear << endl;
+    cout << "Time Slot   : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+    cout << "Customer    : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+    cout << "Staff       : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+    cout << "Service     : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+    cout << "Price       : RM " << fixed << setprecision(2) << schedule[monthIndex][dayIndex][slotIndex].price << endl;
     cout << "----------------------------------" << endl;
-    cout << "Your Appointment ID is: " << YELLOW << schedule[dayIndex][slotIndex].appointmentID << RESET << endl;
+    cout << "Your Appointment ID is: " << YELLOW << schedule[monthIndex][dayIndex][slotIndex].appointmentID << RESET << endl;
 }
 
 void CancelAppointment(const string& currentUserId) {
@@ -1956,50 +2011,53 @@ void CancelAppointment(const string& currentUserId) {
     //default is false
     bool found = false;
 
-    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
-        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
 
-            //check wether is "booked" and have an "id"
-            if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].appointmentID == targetID) {
-                found = true;
+                //check wether is "booked" and have an "id"
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].appointmentID == targetID) {
+                    found = true;
 
-                //permission checking
-                if (!currentUserId.empty() && schedule[dayIndex][slotIndex].customerID != currentUserId) {
-                    cout << RED << "\n[Error] You do not have permission to cancel another customer's appointment!" << RESET << endl;
+                    //permission checking
+                    if (!currentUserId.empty() && schedule[monthIndex][dayIndex][slotIndex].customerID != currentUserId) {
+                        cout << RED << "\n[Error] You do not have permission to cancel another customer's appointment!" << RESET << endl;
+                        return;
+                    }
+
+                    //print the details let user double check
+                    cout << "\n------- Appointment Detail -------" << endl;
+                    cout << "Day         : " << (dayIndex + 1) << "-" << (monthIndex + 1) << "-" << curYear << endl;
+                    cout << "Time Slot   : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+                    cout << "Customer    : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+                    cout << "Staff       : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+                    cout << "Service     : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+                    cout << "----------------------------------" << endl;
+
+                    // double confirm
+                    char confirm;
+                    cout << "Are you sure you want to cancel this appointment? (Y/N): ";
+                    cin >> confirm;
+
+                    if (confirm == 'Y' || confirm == 'y') {
+                        schedule[monthIndex][dayIndex][slotIndex].isBooked = false;
+                        schedule[monthIndex][dayIndex][slotIndex].status = "Available";
+                        schedule[monthIndex][dayIndex][slotIndex].appointmentID = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].customerID = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].customerName = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].staffID = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].staffName = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].service = "-";
+                        schedule[monthIndex][dayIndex][slotIndex].price = 0.0;
+                        SaveScheduleToFile();
+
+                        cout << GREEN << "\n[Success] Appointment " << targetID << " has been cancelled successfully!" << RESET << endl;
+                    }
+                    else {
+                        cout << RED << "\n[Info] Cancellation aborted." << RESET << endl;
+                    }
                     return;
                 }
-
-                //print the details let user double check
-                cout << "\n------- Appointment Detail -------" << endl;
-                cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
-                cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
-                cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
-                cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
-                cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
-                cout << "----------------------------------" << endl;
-
-                // double confirm
-                char confirm;
-                cout << "Are you sure you want to cancel this appointment? (Y/N): ";
-                cin >> confirm;
-
-                if (confirm == 'Y' || confirm == 'y') {
-                    schedule[dayIndex][slotIndex].isBooked = false;
-                    schedule[dayIndex][slotIndex].status = "Available";
-                    schedule[dayIndex][slotIndex].appointmentID = "-";
-                    schedule[dayIndex][slotIndex].customerID = "-";
-                    schedule[dayIndex][slotIndex].customerName = "-";
-                    schedule[dayIndex][slotIndex].staffID = "-";
-                    schedule[dayIndex][slotIndex].staffName = "-";
-                    schedule[dayIndex][slotIndex].service = "-";
-                    SaveScheduleToFile();
-
-                    cout << GREEN << "\n[Success] Appointment " << targetID << " has been cancelled successfully!" << RESET << endl;
-                }
-                else {
-                    cout << RED << "\n[Info] Cancellation aborted." << RESET << endl;
-                }
-                return;
             }
         }
     }
@@ -2024,105 +2082,122 @@ void RescheduleAppointment(const string& currentUserId) {
     //default is false
     bool found = false;
 
-    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
-        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
 
-            //check wether is "booked" and have an "id"
-            if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].appointmentID == targetID) {
-                found = true;
+                //check wether is "booked" and have an "id"
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].appointmentID == targetID) {
+                    found = true;
 
-                //permission checking
-                if (!currentUserId.empty() && schedule[dayIndex][slotIndex].customerID != currentUserId) {
-                    cout << RED << "\n[Error] You do not have permission to reschedule another customer's appointment!" << RESET << endl;
+                    //permission checking
+                    if (!currentUserId.empty() && schedule[monthIndex][dayIndex][slotIndex].customerID != currentUserId) {
+                        cout << RED << "\n[Error] You do not have permission to reschedule another customer's appointment!" << RESET << endl;
+                        return;
+                    }
+
+                    //print the details let user double check
+                    cout << "\n------- Current Appointment Detail -------" << endl;
+                    cout << "Date        : " << (dayIndex + 1) << "-" << monthIndex + 1 << "-" << curYear << endl;
+                    cout << "Time Slot   : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+                    cout << "Customer    : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+                    cout << "Staff       : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+                    cout << "Service     : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+                    cout << "------------------------------------------" << endl;
+
+                    int newMonthOption;
+                    cout << "\nEnter New Month (1 - 12): ";
+                    cin >> newMonthOption;
+
+                    if (cin.fail() || newMonthOption < 1 || newMonthOption > 12) {
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << RED << "\n[Error] Invalid month input!" << RESET << endl;
+                        return;
+                    }
+
+                    int newMonthIndex = newMonthOption - 1;
+
+                    // 1. input new day
+                    int maxDays = daysInMonth[newMonthIndex];
+                    int newDayOption;
+                    cout << "Enter New Day of the Month (1 - " << maxDays << "): ";
+                    cin >> newDayOption;
+
+                    // check day
+                    if (cin.fail() || newDayOption < 1 || newDayOption > 31) {
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << RED << "\n[Error] Invalid day input!" << RESET << endl;
+                        return;
+                    }
+
+                    int newDayIndex = newDayOption - 1;
+
+                    // pass month & day cant book
+                    if (newMonthOption < curMonth || (newMonthOption == curMonth && newDayOption < curDay)) {
+                        cout << RED << "\n[Error] Cannot reschedule to past dates!" << RESET << endl;
+                        return;
+                    }
+
+                    // open the day customer input
+                    ViewAllAppointment(schedule[newMonthIndex][newDayIndex], TOTAL_SLOTS);
+
+                    // 2. input new time
+                    int newSlotOption;
+                    cout << "Enter the new timeslot you prefer: ";
+                    cin >> newSlotOption;
+
+                    // check timeslot
+                    if (cin.fail() || newSlotOption < 1 || newSlotOption > TOTAL_SLOTS) {
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << RED << "\n[Error] Invalid timeslot ID!" << RESET << endl;
+                        return;
+                    }
+
+                    int newSlotIndex = newSlotOption - 1;
+                    int slotStartHours[] = { 9, 11, 13, 15, 17, 19, 21 };
+
+                    // pass time cant book
+                    if (newMonthOption == curMonth && newDayOption == curDay && slotStartHours[newSlotIndex] <= curHour) {
+                        cout << RED << "\n[Error] This time slot has already passed for today!" << RESET << endl;
+                        return;
+                    }
+
+                    // cant book duplicate
+                    if (schedule[newMonthIndex][newDayIndex][newSlotIndex].isBooked && (newMonthIndex != monthIndex || newDayIndex != dayIndex || newSlotIndex != slotIndex)) {
+                        cout << RED << "\n[Sorry] Selected timeslot is already booked!" << RESET << endl;
+                        return;
+                    }
+
+                    // 3. transfer data to new slot
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].appointmentID = schedule[monthIndex][dayIndex][slotIndex].appointmentID;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].customerID = schedule[monthIndex][dayIndex][slotIndex].customerID;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].customerName = schedule[monthIndex][dayIndex][slotIndex].customerName;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].staffID = schedule[monthIndex][dayIndex][slotIndex].staffID;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].staffName = schedule[monthIndex][dayIndex][slotIndex].staffName;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].service = schedule[monthIndex][dayIndex][slotIndex].service;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].price = schedule[monthIndex][dayIndex][slotIndex].price;
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].status = "Booked";
+                    schedule[newMonthIndex][newDayIndex][newSlotIndex].isBooked = true;
+                    SaveScheduleToFile();
+
+                    // 4. reset original slot
+                    schedule[monthIndex][dayIndex][slotIndex].isBooked = false;
+                    schedule[monthIndex][dayIndex][slotIndex].status = "Available";
+                    schedule[monthIndex][dayIndex][slotIndex].appointmentID = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].customerID = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].customerName = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].staffID = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].staffName = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].service = "-";
+                    schedule[monthIndex][dayIndex][slotIndex].price = 0;
+                    SaveScheduleToFile();
+
+                    cout << GREEN << "\n[Success] Appointment " << targetID << " has been rescheduled successfully!" << RESET << endl;
                     return;
                 }
-
-                //print the details let user double check
-                cout << "\n------- Current Appointment Detail -------" << endl;
-                cout << "Day         : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
-                cout << "Time Slot   : " << schedule[dayIndex][slotIndex].time << endl;
-                cout << "Customer    : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
-                cout << "Staff       : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
-                cout << "Service     : " << schedule[dayIndex][slotIndex].service << endl;
-                cout << "------------------------------------------" << endl;
-
-                // 1. input new day
-                int newDayOption;
-                cout << "\nEnter New Day of the Month (1 - 31): ";
-                cin >> newDayOption;
-
-                // check day
-                if (cin.fail() || newDayOption < 1 || newDayOption > 31) {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << RED << "\n[Error] Invalid day input!" << RESET << endl;
-                    return;
-                }
-
-                // pass day cant book
-                if (newDayOption < curDay) {
-                    cout << RED << "\n[Error] Cannot reschedule to past dates!" << RESET << endl;
-                    return;
-                }
-
-                // open the day customer input
-                int newDayIndex = newDayOption - 1;
-                ViewAllAppointment(schedule[newDayIndex], TOTAL_SLOTS);
-
-                // 2. input new time
-                int newSlotOption;
-                cout << "Enter the new timeslot you prefer: ";
-                cin >> newSlotOption;
-
-                // check timeslot
-                if (cin.fail() || newSlotOption < 1 || newSlotOption > TOTAL_SLOTS) {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << RED << "\n[Error] Invalid timeslot ID!" << RESET << endl;
-                    return;
-                }
-
-                int newSlotIndex = newSlotOption - 1;
-                int slotStartHours[] = { 9, 11, 13, 15, 17, 19, 21 };
-
-                // pass time cant book
-                if (newDayOption == curDay && slotStartHours[newSlotIndex] <= curHour) {
-                    cout << RED << "\n[Error] This time slot has already passed for today!" << RESET << endl;
-                    return;
-                }
-
-                // cant book duplicate
-                if (schedule[newDayIndex][newSlotIndex].isBooked) {
-                    cout << RED << "\n[Sorry] Selected timeslot is already booked!" << RESET << endl;
-                    return;
-                }
-
-                // 3. transfer data to new slot
-                schedule[newDayIndex][newSlotIndex].appointmentID = schedule[dayIndex][slotIndex].appointmentID;
-                schedule[newDayIndex][newSlotIndex].customerID = schedule[dayIndex][slotIndex].customerID;
-                schedule[newDayIndex][newSlotIndex].customerName = schedule[dayIndex][slotIndex].customerName;
-                schedule[newDayIndex][newSlotIndex].staffID = schedule[dayIndex][slotIndex].staffID;
-                schedule[newDayIndex][newSlotIndex].staffName = schedule[dayIndex][slotIndex].staffName;
-                schedule[newDayIndex][newSlotIndex].service = schedule[dayIndex][slotIndex].service;
-                schedule[newDayIndex][newSlotIndex].price = schedule[dayIndex][slotIndex].price;
-                schedule[newDayIndex][newSlotIndex].status = "Booked";
-                schedule[newDayIndex][newSlotIndex].isBooked = true;
-                SaveScheduleToFile();
-
-                // 4. reset original slot
-                schedule[dayIndex][slotIndex].isBooked = false;
-                schedule[dayIndex][slotIndex].status = "Available";
-                schedule[dayIndex][slotIndex].appointmentID = "-";
-                schedule[dayIndex][slotIndex].customerID = "-";
-                schedule[dayIndex][slotIndex].customerName = "-";
-                schedule[dayIndex][slotIndex].staffID = "-";
-                schedule[dayIndex][slotIndex].staffName = "-";
-                schedule[dayIndex][slotIndex].service = "-";
-                schedule[dayIndex][slotIndex].price = 0;
-                SaveScheduleToFile();
-
-                cout << GREEN << "\n[Success] Appointment " << targetID << " has been rescheduled successfully!" << RESET << endl;
-                return;
             }
         }
     }
@@ -2159,9 +2234,23 @@ void ViewStaffSchedule() {
     string targetStaffID = staffDB[selectedStaff].idStaff;
     string targetStaffName = staffDB[selectedStaff].nameStaff;
 
+    int monthOption;
+    cout << "\nEnter Month (1 - 12): ";
+    cin >> monthOption;
+
+    if (cin.fail() || monthOption < 1 || monthOption > 12) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "\n[Error] Invalid month input!" << RESET << endl;
+        return;
+    }
+
+    int monthIndex = monthOption - 1;
+
+    int maxDays = daysInMonth[monthIndex];
     //choose specific day or all appointment 
     int dayOption;
-    cout << "\nEnter Day of Month (1 - 31, or enter 0 to view ALL days): ";
+    cout << "Enter Day of Month (1 - " << maxDays << ", or enter 0 to view ALL days in Month " << monthOption << "): ";
     cin >> dayOption;
 
     if (cin.fail() || dayOption < 0 || dayOption > 31) {
@@ -2174,7 +2263,7 @@ void ViewStaffSchedule() {
     //display the month
     if (dayOption == 0) {
         cout << "\n===========================================" << endl;
-        cout << " Full Schedule for: " << GREEN << targetStaffID << " - " << targetStaffName << RESET << endl;
+        cout << " Full Schedule for: " << GREEN << targetStaffID << " - " << targetStaffName << RESET << " (Month " << monthOption << ")" << endl;
         cout << "===========================================" << endl;
 
         bool hasBooking = false;
@@ -2189,17 +2278,17 @@ void ViewStaffSchedule() {
         int w_price = string("Price (RM)").length();
 
         //find table width
-        for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
             for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
-                if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].staffID == targetStaffID) {
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].staffID == targetStaffID) {
                     string dayStr = "Day " + to_string(dayIndex + 1);
-                    string priceStr = (ostringstream() << fixed << setprecision(2) << schedule[dayIndex][slotIndex].price).str();
+                    string priceStr = (ostringstream() << fixed << setprecision(2) << schedule[monthIndex][dayIndex][slotIndex].price).str();
                     w_day = max(w_day, (int)dayStr.length());
-                    w_time = max(w_time, (int)schedule[dayIndex][slotIndex].time.length());
-                    w_id = max(w_id, (int)schedule[dayIndex][slotIndex].appointmentID.length());
-                    w_custID = max(w_custID, (int)schedule[dayIndex][slotIndex].customerID.length());
-                    w_custName = max(w_custName, (int)schedule[dayIndex][slotIndex].customerName.length());
-                    w_service = max(w_service, (int)schedule[dayIndex][slotIndex].service.length());
+                    w_time = max(w_time, (int)schedule[monthIndex][dayIndex][slotIndex].time.length());
+                    w_id = max(w_id, (int)schedule[monthIndex][dayIndex][slotIndex].appointmentID.length());
+                    w_custID = max(w_custID, (int)schedule[monthIndex][dayIndex][slotIndex].customerID.length());
+                    w_custName = max(w_custName, (int)schedule[monthIndex][dayIndex][slotIndex].customerName.length());
+                    w_service = max(w_service, (int)schedule[monthIndex][dayIndex][slotIndex].service.length());
                     w_price = max(w_price, (int)priceStr.length());
                 }
             }
@@ -2211,7 +2300,7 @@ void ViewStaffSchedule() {
             + "+" + string(w_id + 2, '-')
             + "+" + string(w_custID + 2, '-')
             + "+" + string(w_custName + 2, '-')
-            + "+" + string(w_service + 2, '-') 
+            + "+" + string(w_service + 2, '-')
             + "+" + string(w_price + 2, '-') + "+";
 
         //header
@@ -2227,17 +2316,17 @@ void ViewStaffSchedule() {
 
         for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
             for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
-                if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].staffID == targetStaffID) {
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].staffID == targetStaffID) {
                     hasBooking = true;
-                    string dayStr = "Day " + to_string(dayIndex + 1);
+                    string dayStr = to_string(dayIndex + 1);
                     //table info width
                     cout << "| " << left << setw(w_day) << dayStr << " "
-                        << "| " << setw(w_time) << schedule[dayIndex][slotIndex].time << " "
-                        << "| " << setw(w_id) << schedule[dayIndex][slotIndex].appointmentID << " "
-                        << "| " << setw(w_custID) << schedule[dayIndex][slotIndex].customerID << " "
-                        << "| " << setw(w_custName) << schedule[dayIndex][slotIndex].customerName << " "
-                        << "| " << setw(w_service) << schedule[dayIndex][slotIndex].service << " "
-                        << "| " << setw(w_price) << schedule[dayIndex][slotIndex].price << " "
+                        << "| " << setw(w_time) << schedule[monthIndex][dayIndex][slotIndex].time << " "
+                        << "| " << setw(w_id) << schedule[monthIndex][dayIndex][slotIndex].appointmentID << " "
+                        << "| " << setw(w_custID) << schedule[monthIndex][dayIndex][slotIndex].customerID << " "
+                        << "| " << setw(w_custName) << schedule[monthIndex][dayIndex][slotIndex].customerName << " "
+                        << "| " << setw(w_service) << schedule[monthIndex][dayIndex][slotIndex].service << " "
+                        << "| " << setw(w_price) << schedule[monthIndex][dayIndex][slotIndex].price << " "
                         << "|" << endl;
                 }
             }
@@ -2257,7 +2346,7 @@ void ViewStaffSchedule() {
             << " on Day " << dayOption << ":" << endl;
 
         //filter by staffID
-        ViewAllAppointment(schedule[dayIndex], TOTAL_SLOTS, targetStaffID);
+        ViewAllAppointment(schedule[monthIndex][dayIndex], TOTAL_SLOTS, targetStaffID);
     }
 }
 
@@ -2275,56 +2364,58 @@ void AppointmentMarking() {
     // default is false
     bool found = false;
 
-    for (int dayIndex = 0; dayIndex < 31; dayIndex++) {
-        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
 
-            // check whether is "booked" and have an "id"
-            if (schedule[dayIndex][slotIndex].isBooked && schedule[dayIndex][slotIndex].appointmentID == targetID) {
-                found = true;
+                // check whether is "booked" and have an "id"
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].appointmentID == targetID) {
+                    found = true;
 
-                // print current details for confirmation
-                cout << "\n------- Appointment Detail -------" << endl;
-                cout << "Day           : " << (dayIndex + 1) << "-" << curMonth << "-" << curYear << endl;
-                cout << "Time Slot     : " << schedule[dayIndex][slotIndex].time << endl;
-                cout << "Customer      : " << schedule[dayIndex][slotIndex].customerName << " (" << schedule[dayIndex][slotIndex].customerID << ")" << endl;
-                cout << "Staff         : " << schedule[dayIndex][slotIndex].staffName << " (" << schedule[dayIndex][slotIndex].staffID << ")" << endl;
-                cout << "Service       : " << schedule[dayIndex][slotIndex].service << endl;
-                cout << "Current Status: " << YELLOW << schedule[dayIndex][slotIndex].status << RESET << endl;
-                cout << "----------------------------------" << endl;
+                    // print current details for confirmation
+                    cout << "\n------- Appointment Detail -------" << endl;
+                    cout << "Date          : " << (dayIndex + 1) << "-" << monthIndex + 1 << "-" << curYear << endl;
+                    cout << "Time Slot     : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+                    cout << "Customer      : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+                    cout << "Staff         : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+                    cout << "Service       : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+                    cout << "Current Status: " << YELLOW << schedule[monthIndex][dayIndex][slotIndex].status << RESET << endl;
+                    cout << "----------------------------------" << endl;
 
-                // select new status
-                cout << "\nSelect New Status:\n";
-                cout << "1. Completed\n";
-                cout << "2. Pending Payment\n";
-                cout << "3. No-Show\n";
-                cout << "Select status option (1 - 3): ";
+                    // select new status
+                    cout << "\nSelect New Status:\n";
+                    cout << "1. Completed\n";
+                    cout << "2. Pending Payment\n";
+                    cout << "3. No-Show\n";
+                    cout << "Select status option (1 - 3): ";
 
-                int markOption;
-                cin >> markOption;
+                    int markOption;
+                    cin >> markOption;
 
-                if (cin.fail() || markOption < 1 || markOption > 3) {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << RED << "\n[Error] Invalid status option!" << RESET << endl;
+                    if (cin.fail() || markOption < 1 || markOption > 3) {
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << RED << "\n[Error] Invalid status option!" << RESET << endl;
+                        return;
+                    }
+
+                    switch (markOption) {
+                    case 1:
+                        schedule[monthIndex][dayIndex][slotIndex].status = "Completed";
+                        break;
+                    case 2:
+                        schedule[monthIndex][dayIndex][slotIndex].status = "Pending Payment";
+                        break;
+                    case 3:
+                        schedule[monthIndex][dayIndex][slotIndex].status = "No-Show";
+                        break;
+                    }
+
+                    SaveScheduleToFile();
+                    cout << GREEN << "\n[Success] Appointment " << targetID
+                        << " status updated to: " << schedule[monthIndex][dayIndex][slotIndex].status << RESET << endl;
                     return;
                 }
-
-                switch (markOption) {
-                case 1:
-                    schedule[dayIndex][slotIndex].status = "Completed";
-                    break;
-                case 2:
-                    schedule[dayIndex][slotIndex].status = "Pending Payment";
-                    break;
-                case 3:
-                    schedule[dayIndex][slotIndex].status = "No-Show";
-                    break;
-                }
-
-                SaveScheduleToFile();
-                cout << GREEN << "\n[Success] Appointment " << targetID
-                    << " status updated to: " << schedule[dayIndex][slotIndex].status << RESET << endl;
-                return;
             }
         }
     }
