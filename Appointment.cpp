@@ -60,6 +60,13 @@ struct Timeslot {
     string status;
     double price;
 };
+
+//Appontment Service
+struct AppointmentService {
+    string serviceID;
+    string serviceName;
+    double price;
+};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Ng Jun Sheng
@@ -90,16 +97,19 @@ int staffCounter = 1011;
 int serviceCounter = 1006;
 int bookingCounter = 1001;
 int appointmentCounter = 1001;
+int appointmentServiceCounter = 1003;
 
 const int MAX_CUSTOMERS = 100;
 const int MAX_MEMBERS = 100;
 const int MAX_STAFF = 100;
+const int MAX_APPOINTMENT_SERVICES = 100;
 
 int customerCount = 4;
 int memberCount = 4;
 int staffCount = 10;
 int servicecount = 5;
-int bookingCount = 0;
+int bookingCount = 10;
+int appointmentServiceCount = 2;
 
 // Total slots and days in month
 const int TOTAL_SLOTS = 7;
@@ -157,7 +167,18 @@ Services servicesDB[MAX_SERVICES] = {
     {"SI1005", "Skin Care Threatment ", 110.00, 90},
 };
 
-Bookings bookingDB[MAX_BOOKINGS];
+Bookings bookingDB[MAX_BOOKINGS] = {
+    { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Booked" },
+    { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed" },
+    { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Booked" },
+    { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed" },
+    { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Booked" },
+    { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed" },
+    { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Booked" },
+    { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed" },
+    { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Booked" },
+    { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed" },
+};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Hao Zheng
 Timeslot defaultDaySlots[TOTAL_SLOTS] = {
@@ -171,6 +192,13 @@ Timeslot defaultDaySlots[TOTAL_SLOTS] = {
 };
 
 Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];
+
+AppointmentService appointmentServiceDB[MAX_APPOINTMENT_SERVICES] = {
+    {"AS1001", "Wedding Event", 500.00},
+    {"AS1002", "Hair dressing with make up", 150.00}
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Function Declarations
@@ -244,15 +272,21 @@ void CancelAppointment(const string& currentUserId = "");
 void RescheduleAppointment(const string& currentUserId = "");
 void ViewStaffSchedule();
 void AppointmentMarking();
+void ViewAppointmentServices();
+void AddAppointmentService();
+void EditAppointmentService();
+void DeleteAppointmentService();
 void inYearlySchedule();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Reporting - CAI XUAN
+bool isValidDateRange(int month, int year, int week);
+void setupTestData();
+void loadSmallAppointments();
+void loadEventAppointments();
 void loadDataFromTeamSystem();
-void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
-void SearchBookingReport();
+void displayBarchart(string reportTitle, int month, int year, int weekFilter, int type, ostream& out = cout);
 void RevenueReport(ostream& out = cout);
 void StaffReport(ostream& out = cout);
-void displayBarchart(string reportTitle, int month, int year, int weekFilter = 0, ostream& out = cout);
 void ReportExport();
 void reportingMenu();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2043,6 +2077,7 @@ void editService() {
     }
 
     cout << "\nEnter new service name: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, servicesDB[index].servicename);
 
     cout << "Enter new price: RM ";
@@ -2385,6 +2420,10 @@ void AppointmentStaff() {
         cout << "4. Reschedule Appointment" << endl;
         cout << "5. View Staff Schedule" << endl;
         cout << "6. Appointment Marking" << endl;
+        cout << "7. View Appointment Service" << endl;
+        cout << "8. Add Appointment Service" << endl;
+        cout << "9. Edit Appointment Service" << endl;
+        cout << "10. Delete Appointment Service" << endl;
         cout << "0. Exit\n" << endl;
 
         cout << "Select option: ";
@@ -2426,7 +2465,7 @@ void AppointmentStaff() {
             }
 
             int dayIndex = day - 1;
-            cout << "You selected: View All Appointment for Date:  " << day << month << curYear <<endl;
+            cout << "You selected: View All Appointment for Date:  " << day << "-" << month << "-" << curYear << endl;
             ViewAllAppointment(schedule[monthIndex][dayIndex], TOTAL_SLOTS);
             break;
         }
@@ -2449,6 +2488,22 @@ void AppointmentStaff() {
         case 6:
             cout << "You selected: Appointment Marking" << endl;
             AppointmentMarking();
+            break;
+        case 7:
+            cout << "You slected: View Appointment Service" << endl;
+            ViewAppointmentServices();
+            break;
+        case 8:
+            cout << "You slected: Add Appointment Service" << endl;
+            AddAppointmentService();
+            break;
+        case 9:
+            cout << "You slected: Edit Appointment Service" << endl;
+            EditAppointmentService();
+            break;
+        case 10:
+            cout << "You slected: Delete Appointment Service" << endl;
+            DeleteAppointmentService();
             break;
         case 0:
             cout << "Returning to Staff Menu..." << endl;
@@ -2773,30 +2828,27 @@ void CreateAppointmentStaff() {
         return;
     }
 
+    //Appointment Service menu
+    for (int i = 0; i < appointmentServiceCount; i++) {
+        cout << (i + 1) << ". " << appointmentServiceDB[i].serviceName
+            << " (RM " << fixed << setprecision(2) << appointmentServiceDB[i].price << ")\n";
+    }
+
     int Appointmentoption;
     cout << "\nEnter a Service:\n";
-    cout << "1. Wedding Event\n";
-    cout << "2. Hair dressing with make up\n";
-    cout << "Select service: ";
     cin >> Appointmentoption;
 
-    if (cin.fail() || (Appointmentoption != 1 && Appointmentoption != 2)) {
+    if (cin.fail() || (Appointmentoption < 1 || Appointmentoption > appointmentServiceCount)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << RED << "[Error] Invalid service option. Booking canceled." << RESET << endl;
         return;
     }
 
-    switch (Appointmentoption) {
-    case 1:
-        schedule[monthIndex][dayIndex][slotIndex].service = "Wedding Event";
-        schedule[monthIndex][dayIndex][slotIndex].price = 500.00;
-        break;
-    case 2:
-        schedule[monthIndex][dayIndex][slotIndex].service = "Hair dressing with make up";
-        schedule[monthIndex][dayIndex][slotIndex].price = 150.00;
-        break;
-    } 
+    int selectedServiceIdx = Appointmentoption - 1;
+    schedule[monthIndex][dayIndex][slotIndex].service = appointmentServiceDB[selectedServiceIdx].serviceName;
+    schedule[monthIndex][dayIndex][slotIndex].price = appointmentServiceDB[selectedServiceIdx].price;
+
     //intepret data to timeslot
     int selectedIndex = staffoption - 1;
 
@@ -3393,4 +3445,261 @@ void AppointmentMarking() {
     }
 }
 
+void ViewAppointmentServices() {
+    cout << "\n==============================================================" << endl;
+    cout << "                  APPOINTMENT SERVICES LIST                   " << endl;
+    cout << "==============================================================" << endl;
+
+    if (appointmentServiceCount == 0) {
+        cout << YELLOW << "No appointment services available." << RESET << endl;
+        return;
+    }
+
+    int w_num = string("No.").length();
+    int w_id = string("Service ID").length();
+    int w_name = string("Service Name").length();
+    int w_price = string("Price (RM)").length();
+
+    for (int i = 0; i < appointmentServiceCount; i++) {
+
+        string priceStream = (ostringstream() << fixed << setprecision(2) << appointmentServiceDB[i].price).str();
+
+        w_num = max(w_num, (int)to_string(i + 1).length());
+        w_id = max(w_id, (int)appointmentServiceDB[i].serviceID.length());
+        w_name = max(w_name, (int)appointmentServiceDB[i].serviceName.length());
+        w_price = max(w_price, (int)priceStream.length());
+    }
+
+    string separator 
+        = "+" + string(w_num + 2, '-')
+        + "+" + string(w_id + 2, '-')
+        + "+" + string(w_name + 2, '-')
+        + "+" + string(w_price + 2, '-') + "+";
+
+    cout << separator << endl;
+    cout << "| " << left << setw(w_num) << "No." << " "
+        << "| " << setw(w_id) << "Service ID" << " "
+        << "| " << setw(w_name) << "Service Name" << " "
+        << "| " << setw(w_price) << "Price (RM)" << " |\n";
+    cout << separator << endl;
+
+    for (int i = 0; i < appointmentServiceCount; i++) {
+        cout << "| " << left << setw(w_num) << (i + 1) << " "
+            << "| " << setw(w_id) << appointmentServiceDB[i].serviceID << " "
+            << "| " << setw(w_name) << appointmentServiceDB[i].serviceName << " "
+            << "| " << setw(w_price) << fixed << setprecision(2) << appointmentServiceDB[i].price << " "
+            << "|" << endl;
+    }
+
+    cout << separator << endl;
+}
+
+void AddAppointmentService() {
+    cout << "\n===========================================" << endl;
+    cout << "         ADD NEW APPOINTMENT SERVICE       " << endl;
+    cout << "===========================================" << endl;
+
+    if (appointmentServiceCount >= MAX_APPOINTMENT_SERVICES) {
+        cout << RED << "[Error] Database full! Cannot add more services." << RESET << endl;
+        return;
+    }
+
+    string name;
+    double price;
+
+    cout << "Enter Service Name: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, name);
+
+    if (name.empty()) {
+        cout << RED << "[Error] Service name cannot be empty!" << RESET << endl;
+        return;
+    }
+
+    cout << "Enter Service Price (RM): ";
+    cin >> price;
+
+    if (cin.fail() || price <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid price amount!" << RESET << endl;
+        return;
+    }
+
+    //generate AppointmentService ID
+    string newID = "AS" + to_string(appointmentServiceCounter++);
+
+    appointmentServiceDB[appointmentServiceCount].serviceID = newID;
+    appointmentServiceDB[appointmentServiceCount].serviceName = name;
+    appointmentServiceDB[appointmentServiceCount].price = price;
+    appointmentServiceCount++;
+
+    cout << GREEN << "\n[Success] Service '" << name << "' (" << newID << ") added successfully!" << RESET << endl;
+}
+
+void EditAppointmentService() {
+    cout << "\n===========================================" << endl;
+    cout << "        EDIT APPOINTMENT SERVICE           " << endl;
+    cout << "===========================================" << endl;
+
+    ViewAppointmentServices();
+    if (appointmentServiceCount == 0) return;
+
+    int option;
+    cout << "\nSelect Service No. to edit (1 - " << appointmentServiceCount << "): ";
+    cin >> option;
+
+    if (cin.fail() || option < 1 || option > appointmentServiceCount) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid selection!" << RESET << endl;
+        return;
+    }
+
+    int index = option - 1;
+
+    cout << "\nEditing Service: " << YELLOW << appointmentServiceDB[index].serviceName << RESET << endl;
+
+    string newName;
+    cout << "Enter New Service Name (Press Enter to keep current): ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, newName);
+
+    if (!newName.empty()) {
+        appointmentServiceDB[index].serviceName = newName;
+    }
+
+    double newPrice;
+    cout << "Enter New Price (RM) (Enter 0 to keep current RM " << fixed << setprecision(2) << appointmentServiceDB[index].price << "): ";
+    cin >> newPrice;
+
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid price input! Price kept unchanged." << RESET << endl;
+    }
+    else if (newPrice > 0) {
+        appointmentServiceDB[index].price = newPrice;
+    }
+
+    cout << GREEN << "\n[Success] Appointment Service updated successfully!" << RESET << endl;
+}
+
+void DeleteAppointmentService() {
+    cout << "\n===========================================" << endl;
+    cout << "       DELETE APPOINTMENT SERVICE          " << endl;
+    cout << "===========================================" << endl;
+
+    ViewAppointmentServices();
+    if (appointmentServiceCount == 0) return;
+
+    int option;
+    cout << "\nSelect Service No. to delete (1 - " << appointmentServiceCount << "): ";
+    cin >> option;
+
+    if (cin.fail() || option < 1 || option > appointmentServiceCount) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "[Error] Invalid selection!" << RESET << endl;
+        return;
+    }
+
+    int index = option - 1;
+    string deletedName = appointmentServiceDB[index].serviceName;
+
+    //move back the number deleted
+    for (int i = index; i < appointmentServiceCount - 1; i++) {
+        appointmentServiceDB[i] = appointmentServiceDB[i + 1];
+    }
+    appointmentServiceCount--;
+
+    cout << GREEN << "\n[Success] Service '" << deletedName << "' has been deleted!" << RESET << endl;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Lim Cai Xuan
+bool isValidDateRange(int month, int year, int week) {
+    if (month < 1 || month > 12) {
+        return false;
+    }
+    if (year < 2000 || year > 2099) {
+        return false;
+    }
+    if (week < 0 || week > 5) {
+        return false;
+    }
+    return true;
+}
+
+//void loadSmallAppointments() {
+//
+//    if (bookingCount == 0) {
+//        cout << "No booking data available for reporting.\n";
+//        return;
+//    }
+//
+//    for (int i = 0; i < bookingCount; i++) {
+//        const Bookings& booking = bookingDB[i];
+//
+//        if (booking.status != "Completed" && booking.status != "Booked") {
+//            continue;
+//        }
+//
+//        int serviceIdx = findServiceID(booking.serviceID);
+//        // Skip if service is not found
+//        if (serviceIdx == -1) {
+//            continue;
+//        }
+//        // Stop if report array capacity is reached MAX_SIZE
+//        if (bookingCount >= MAX_BOOKINGS) {
+//            cout << "Report data is full.\n";
+//            return;
+//        }
+//
+//        const Services& service = servicesDB[serviceIdx];
+//        appointments[bookingCount].appointmentId = booking.bookingID;
+//
+//        // Fetch customer name from Customer & Member database
+//        int custIdx = findCustomerIndex(booking.customerID);
+//        if (custIdx != -1) {
+//            appointments[appointmentCount].customerName = customerDB[custIdx].nameCustomer;
+//        }
+//        else {
+//            int memIdx = findMemberIndex(booking.customerID);
+//            if (memIdx != -1) {
+//                appointments[appointmentCount].customerName = memberDB[memIdx].nameMember;
+//            }
+//            else {
+//                appointments[appointmentCount].customerName = booking.customerID;
+//            }
+//        }
+//        // Fetch staff name from Staff database
+//        int staffIdx = findStaffIndex(booking.staffID);
+//        if (staffIdx != -1) {
+//            appointments[appointmentCount].staffName = staffDB[staffIdx].nameStaff;
+//        }
+//        else {
+//            appointments[appointmentCount].staffName = booking.staffID;
+//        }
+//        // Set service details, quantity, and pric
+//        appointments[appointmentCount].serviceName = service.servicename;
+//        appointments[appointmentCount].quantity = 1;
+//        appointments[appointmentCount].price = service.price;
+//
+//        if (booking.date.length() >= 10) {
+//            appointments[appointmentCount].day = stoi(booking.date.substr(0, 2));
+//            appointments[appointmentCount].month = stoi(booking.date.substr(3, 2));
+//            appointments[appointmentCount].year = stoi(booking.date.substr(6, 4));
+//        }
+//        else {
+//            appointments[appointmentCount].day = 1;
+//            appointments[appointmentCount].month = 8;
+//            appointments[appointmentCount].year = 2026;
+//        }
+//
+//        appointments[appointmentCount].timeSlot = booking.time;
+//        appointments[appointmentCount].status = booking.status;
+//
+//        appointmentCount++;
+//    }
+//}
