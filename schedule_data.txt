@@ -1792,13 +1792,13 @@
 8|7|6|0||||||||0
 8|8|0|0||||||||0
 8|8|1|0||||||||0
-8|8|2|0||||||||0
-8|8|3|0||||||||0
+8|8|2|1|APT1001|Pending Payment|STF1005|Lim Cai Xuan|C1002|Priya a/p Anbalagan|Wedding Event|500
+8|8|3|1|APT1002|Booked|STF1005|Lim Cai Xuan|C1004|Lily Yee|gugugaga|1
 8|8|4|0||||||||0
 8|8|5|0||||||||0
 8|8|6|0||||||||0
 8|9|0|0||||||||0
-8|9|1|0||||||||0
+8|9|1|1|APT1003|Completed|STF1004|Lim Xiao Qing|C1002|Priya a/p Anbalagan|Hair dressing with make up|150
 8|9|2|0||||||||0
 8|9|3|0||||||||0
 8|9|4|0||||||||0
