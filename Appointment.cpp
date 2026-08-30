@@ -121,6 +121,7 @@ int staffCount = 10;
 int servicecount = 5;
 int bookingCount = 10;
 int appointmentServiceCount = 2;
+int ratingCount = 2;
 
 // Total slots and days in month
 const int TOTAL_SLOTS = 7;
@@ -706,7 +707,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             cout << "\n-> [Customer UI] Billing module selected.\n";
             break;
         case 5:
-            ratingCM(userId, accountType)
+            ratingCM(userId, accountType);
             break;
         default:
             cout << RED << "[Error] Invalid selection.\n" << RESET;
@@ -1057,7 +1058,7 @@ void showStaffUI(const string& username) {
         cout << "[ 4 ] Appointment Management\n";
         cout << "[ 5 ] View History\n";
         cout << "[ 6 ] Reporting\n";
-        cout << "[ 7 ] View Rating\n"
+        cout << "[ 7 ] View Rating\n";
         cout << "[ 8 ] Logout\n";
         cout << "Select admin task: ";
 
