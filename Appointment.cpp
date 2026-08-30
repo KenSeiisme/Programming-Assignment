@@ -2713,19 +2713,19 @@ void AppointmentStaff() {
             AppointmentMarking();
             break;
         case 7:
-            cout << "You slected: View Appointment Service" << endl;
+            cout << "You selected: View Appointment Service" << endl;
             ViewAppointmentServices();
             break;
         case 8:
-            cout << "You slected: Add Appointment Service" << endl;
+            cout << "You selected: Add Appointment Service" << endl;
             AddAppointmentService();
             break;
         case 9:
-            cout << "You slected: Edit Appointment Service" << endl;
+            cout << "You selected: Edit Appointment Service" << endl;
             EditAppointmentService();
             break;
         case 10:
-            cout << "You slected: Delete Appointment Service" << endl;
+            cout << "You selected: Delete Appointment Service" << endl;
             DeleteAppointmentService();
             break;
         case 0:
@@ -2754,6 +2754,7 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
         cout << "1. Create a New Appointment" << endl;
         cout << "2. Cancel Appointment" << endl;
         cout << "3. Reschedule Appointment" << endl;
+        cout << "4. View Appointment Service" << endl;
         cout << "0. Exit\n" << endl;
 
         cout << "Select option: ";
@@ -2781,6 +2782,10 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
         case 3:
             cout << "You selected: Reschedule Appointment" << endl;
             RescheduleAppointment(currentUserId);
+            break;
+        case 4:
+            cout << "You selected: View Appointment Service" << endl;
+            ViewAppointmentServices();
             break;
         case 0:
             cout << "Returning to Customer/Member Menu..." << endl;
