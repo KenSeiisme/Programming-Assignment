@@ -823,8 +823,7 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
         cout << "============ MEMBER/CUSTOMER PROFILE ============\n";
         cout << "[ 1 ] View your profile\n";
         cout << "[ 2 ] Edit Profile\n";
-        cout << "[ 3 ] Renew membership\n";
-        cout << "[ 4 ] Exit (Return to Main Menu)\n";
+        cout << "[ 3 ] Exit (Return to Main Menu)\n";
         cout << "Select option (1-4): ";
 
         if (!(cin >> choice)) {
