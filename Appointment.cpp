@@ -4249,6 +4249,18 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
     // data stored for other function use
     pmtResult result = pmt_process(customer_id, bill_id, payable, history, history_count, "Service");
 
+    //change the status
+    if (result.status == true)
+    {
+        for (int i = 0; i < bookingCount; i++)
+        {
+            if (bookingDB[i].customerID == customer_id && bookingDB[i].status == "Booked")
+            {
+                bookingDB[i].status = "Completed";
+            }
+        }
+    }
+
     // summary
     cout << setfill('-') << setw(75) << "-" << endl;
     cout << setfill(' ') << " ";
@@ -4343,6 +4355,25 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
 
     // data stored for other function use
     pmtResult result = pmt_process(customer_id, bill_id, payable, history, history_count, "Appointment");
+
+    //change the status after successful
+    if (result.status == true)
+    {
+        for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+            for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+                for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+
+                    Timeslot& slot = schedule[monthIndex][dayIndex][slotIndex];
+
+                    if (slot.isBooked && (slot.customerName == customer_name || slot.customerName == customer_id)) {
+                        if (slot.status == "Pending Payment" || slot.status == "Booked") {
+                            slot.status = "Completed";
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     //summary
     cout << setfill('-') << setw(75) << "-" << endl;
