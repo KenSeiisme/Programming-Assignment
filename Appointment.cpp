@@ -52,6 +52,7 @@ struct Rating {
     int score;
     string comment;
 };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Ng Jun Sheng
 // Data structure for Services details
@@ -142,7 +143,7 @@ int appointmentCounter = 1001;
 int appointmentServiceCounter = 1003;
 int ratingCounter = 1003;
 
-//Customer,Member and staff
+//Maximum
 const int MAX_CUSTOMERS = 100;
 const int MAX_MEMBERS = 100;
 const int MAX_STAFF = 100;
@@ -161,7 +162,6 @@ const double membership_fee = 100.00;
 /*array max value*/
 const int hist_max = 100;
 
-//Current database
 int customerCount = 4;
 int memberCount = 4;
 int staffCount = 10;
@@ -170,8 +170,7 @@ int bookingCount = 10;
 int appointmentServiceCount = 2;
 int history_count = 6;
 int Booking_reportCount = 0;
-int ratingCount = 2; 
-
+int ratingCount = 2;
 
 // Total slots and days in month
 const int TOTAL_SLOTS = 7;
@@ -313,7 +312,6 @@ bool isValidEmail(const string& email);
 bool isValidPassword(const string& pass);
 bool isValidPhoneNumber(const string& phone);
 bool isValidName(const string& name);
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Booking - JUN SHENG
 void memberBookingMenu(const string& customerID);//main page for customer
@@ -344,7 +342,6 @@ void staffEditBooking();
 void rescheduleCancelBooking();
 void staffSearchBooking();
 void staffBookingValidation();
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Appointment - HAO ZHENG
 void SaveScheduleToFile();
@@ -364,7 +361,6 @@ void AddAppointmentService();
 void EditAppointmentService();
 void DeleteAppointmentService();
 void inYearlySchedule();
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Payment History - XIAO QING
 void PaymentHistory(histRecord history[], int history_count, bool is_staff, string cust_id);
@@ -395,7 +391,6 @@ double calc_discount(double total_price, bool is_member);
 double calc_tax(double total_after_disc);
 double calc_payable(double total_after_disc, double tax_amt);
 int generateID();
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Reporting - CAI XUAN
 bool isValidDateRange(int month, int year, int week);
@@ -409,7 +404,6 @@ void StaffReport(ostream& out = cout);
 void ReportExport();
 void reportingMenu();
 void Reporting();
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() {
@@ -449,7 +443,7 @@ int findStaffIndex(const string& id) {
     return -1;
 }
 //Validation name,phone number,email and passsword
-bool isValidName(const string& name) {//only allow use dash
+bool isValidName(const string& name) {
     if (name.empty()) return false;
     for (char c : name) {
         if (isdigit(c)) return false;
@@ -459,13 +453,14 @@ bool isValidName(const string& name) {//only allow use dash
 }
 
 bool isValidPhoneNumber(const string& phone) {
-    size_t dashPos = phone.find('-');//must have dash
-    if (dashPos != 3) return false; //before the dash in front must have 3 digit
+    size_t dashPos = phone.find('-'); //must have dash
+    if (dashPos != 3) return false;//before the dash in front must have 3 digit
     if (phone.rfind('-') != 3) return false;
     for (int i = 0; i < 3; ++i) {
         if (!isdigit(phone[i])) return false;
     }
     if (phone.length() <= 4) return false;
+
     for (size_t i = 4; i < phone.length(); ++i) {
         if (!isdigit(phone[i])) return false;
     }
@@ -480,7 +475,7 @@ bool isValidEmail(const string& email) {
 }
 
 bool isValidPassword(const string& pass) {
-    if (pass.length() < 8) return false;//Minimum 8 character
+    if (pass.length() < 8) return false;
     bool hasLetter = false;
     bool hasDigit = false;
     for (char c : pass) {
@@ -583,11 +578,11 @@ void registerCustomer() {
     cout << "\n--- NEW CUSTOMER REGISTRATION ---\n";
 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    //while(true) means infinate loop forever play until correct
+    //while(true) means infinate loop forever until correct
     while (true) {
         cout << "Enter Full Name: ";
         getline(cin, newCustomer.nameCustomer);
-        if (isValidName(newCustomer.nameCustomer)) break;
+        if (isValidName(newCustomer.nameCustomer)) break;//check the name
         cout << RED << "[Error] Invalid name! Only can use alphabet. Try again.\n" << RESET;;
     }
 
@@ -612,14 +607,14 @@ void registerCustomer() {
     while (true) {
         cout << "Enter Phone Number (e.g.: xxx-xxxxxxxx): ";
         cin >> newCustomer.phoneCustomer;
-        if (isValidPhoneNumber(newCustomer.phoneCustomer)) break;
+        if (isValidPhoneNumber(newCustomer.phoneCustomer)) break;//check phone number
         cout << RED << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n" << RESET;
     }
 
     while (true) {
         cout << "Enter Email Address (must end with @gmail.com): ";
         cin >> newCustomer.emailCustomer;
-        if (isValidEmail(newCustomer.emailCustomer)) break;
+        if (isValidEmail(newCustomer.emailCustomer)) break;//check email
         cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
     }
 
@@ -656,7 +651,7 @@ void registerMember() {
 
     cout << "Do you already pay the Member Fee ? (Y=yes,N=no): ";
     cin >> response;
-    response = toupper(response);
+    response = toupper(response);//even write small character will automatically change to big character
 
     if (response == 'Y') {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -691,7 +686,7 @@ void registerMember() {
             cout << "Enter Phone Number (e.g.: xxx-xxxxxxxx): ";
             cin >> newMember.phoneMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            if (isValidPhoneNumber(newMember.phoneMember)) break;
+            if (isValidPhoneNumber(newMember.phoneMember)) break;//check phone number
             cout << RED << "[Error] Invalid phone number! Only can use digit and must at '-' . Try again.\n" << RESET;
         }
 
@@ -699,7 +694,7 @@ void registerMember() {
             cout << "Enter Email Address (must end with @gmail.com): ";
             cin >> newMember.emailMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            if (isValidEmail(newMember.emailMember)) break;
+            if (isValidEmail(newMember.emailMember)) break;//check email
             cout << RED << "[Error] Invalid email! Must end with '@gmail.com'. Try again.\n" << RESET;
         }
 
@@ -707,7 +702,7 @@ void registerMember() {
             cout << "Enter Password (min 8 chars, must contain letters & digits): ";
             cin >> newMember.passwordMember;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            if (isValidPassword(newMember.passwordMember)) break;
+            if (isValidPassword(newMember.passwordMember)) break;//check password
             cout << RED << "[Error] Password must be at least 8 characters long and contain both letters and digits. Try again.\n" << RESET;
         }
         //Generated Member ID
@@ -804,7 +799,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
         case 4:
             cout << "\n-> [Customer UI] Billing module selected.\n";
             cout << "[DEBUG] Entering payment function with userId: " << userId << endl;
-            cin.ignore(10000, '\n'); 
+            cin.ignore(10000, '\n');
             payment(userId, history, history_count);
             cout << "[DEBUG] Exited payment function.\n";
             break;
@@ -823,13 +818,18 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
         cout << "============ MEMBER/CUSTOMER PROFILE ============\n";
         cout << "[ 1 ] View your profile\n";
         cout << "[ 2 ] Edit Profile\n";
-        cout << "[ 3 ] Exit (Return to Main Menu)\n";
+        cout << "[ 3 ] Renew membership\n";
+        cout << "[ 4 ] Exit (Return to Main Menu)\n";
         cout << "Select option (1-4): ";
 
         if (!(cin >> choice)) {
             clearInput();
             cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
+        }
+        if (choice == 6) {
+            cout << "Returning to Dashboard...\n";
+            break;
         }
 
         switch (choice) {
@@ -845,15 +845,11 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
                 cout << "Please register as a Member first to enjoy membership features.\n";
             }
             else {
-                cout << "[DEBUG] Entering payment function with userId: " << userId << endl;
                 cin.ignore(10000, '\n');
                 payment(userId, history, history_count);
                 cout << "\n[Success] Membership renewed successfully!\n";
             }
             break;
-        case 4:
-            cout << "Returning to Main Menu...\n";
-            return;
         default:
             cout << RED << "[Error] Invalid option. Try again.\n" << RESET;
         }
@@ -1017,7 +1013,7 @@ void ratingCM(const string& userId, const string& accountType) {
     ratingDB[ratingCount].staffID = staffID;
     ratingDB[ratingCount].score = stars;
     ratingDB[ratingCount].comment = comment.empty() ? "N/A" : comment;
-    ratingCount++; 
+    ratingCount++;
 
     cout << GREEN << "\n[Success] Rating recorded successfully as " << ratingGeneratedID << "!\n" << RESET;
 }
@@ -1054,14 +1050,14 @@ void staffPortal() {
 }
 
 void registerStaff() {
-    if (staffCount >= MAX_STAFF) { //if more than 100
+    if (staffCount >= MAX_STAFF) {
         cout << RED << "[Error] Staff database capacity reached!\n" << RESET;
-        return;//return to staff portal
+        return;
     }
 
     Staff newStaff;
     cout << "\n--- NEW HAIR SALON STAFF REGISTRATION ---\n";
-    
+    string generatedID = "STF" + to_string(staffCounter++);
 
     clearInput();
 
@@ -1141,9 +1137,6 @@ void registerStaff() {
             cout << RED << "[Error] Invalid position selection. Please enter a number between 1 and 5.\n" << RESET;
         }
     }
-    //Generated Staff id
-    string generatedID = "STF" + to_string(staffCounter++);
-    //Save in staff database
     newStaff.idStaff = generatedID;
     staffDB[staffCount++] = newStaff;
 
@@ -1220,7 +1213,7 @@ void showStaffUI(const string& staffID) {
 
             int confirmIdx = findStaffIndex(confirmID);
             if (confirmIdx != -1 && confirmID == staffID) {
-                cout << GREEN << "\n[Access Granted] Verified identity: " << RESET << staffDB[confirmIdx].nameStaff << "\n";
+                cout << RED << "\n[Access Granted] Verified identity: " << RESET << staffDB[confirmIdx].nameStaff << "\n";
                 customerMemberManagement();
             }
             else {
@@ -1294,7 +1287,7 @@ void showStaffList() {
             << " | " << setw(8) << staffDB[i].genderStaff
             << " | " << setw(14) << staffDB[i].phoneStaff
             << " | " << setw(26) << staffDB[i].emailStaff
-            << " | " << setw(20) << "****************"
+            << " | " << setw(20) << "*****************"
             << " | " << setw(20) << staffDB[i].positionStaff << " |\n";
         cout << border << "\n";
     }
@@ -1343,7 +1336,7 @@ void staffManagement() {
                     << " | Position: " << staffDB[stfidx].positionStaff << "\n";
             }
             else {
-                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found.\n" << RESET;//If does not found in current staff database
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found.\n" << RESET;//If not found in staff database
             }
             break;
         }
@@ -1360,7 +1353,7 @@ void staffManagement() {
                 cout << GREEN << "\n[Success] Staff '" << RESET << idStaff << GREEN << "' deleted successfully.\n" << RESET;
             }
             else {
-                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Delete canceled.\n" << RESET;
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Delete canceled.\n" << RESET;//If not found in staff database
             }
             break;
         }
@@ -1370,7 +1363,7 @@ void staffManagement() {
 
             int stfidx = findStaffIndex(idStaff);
             if (stfidx == -1) {
-                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Update canceled.\n" << RESET;//If does not found in current staff database
+                cout << RED << "\n[Error] Staff ID '" << RESET << idStaff << RED << "' not found. Update canceled.\n" << RESET;//If not found in staff database
                 break;
             }
 
@@ -1486,7 +1479,7 @@ void showMemberCustomerList() {
             << " | " << setw(8) << memberDB[i].genderMember
             << " | " << setw(14) << memberDB[i].phoneMember
             << " | " << setw(26) << memberDB[i].emailMember
-            << " | " << setw(20) << "****************" << " |\n";
+            << " | " << setw(20) << "***************" << " |\n";//does not show the password
         cout << border << "\n";
     }
     //customer will be at the buttom
@@ -1496,7 +1489,7 @@ void showMemberCustomerList() {
             << " | " << setw(8) << customerDB[i].genderCustomer
             << " | " << setw(14) << customerDB[i].phoneCustomer
             << " | " << setw(26) << customerDB[i].emailCustomer
-            << " | " << setw(20) << "****************" << " |\n";
+            << " | " << setw(20) << "***************" << " |\n";
         cout << border << "\n";
     }
 }
@@ -1518,7 +1511,7 @@ void customerMemberManagement() {
             continue;
         }
 
-        if (choice == 5) { // if click 5 will back to staff control panel
+        if (choice == 5) { // if click 5 will back to staff control 
             cout << "Returning to Staff Control Panel...\n";
             break;
         }
@@ -1605,7 +1598,7 @@ void customerMemberManagement() {
                 cout << RED << "[Error] Invalid selection. Update canceled.\n" << RESET;
                 break;
             }
-            if (updateChoice == 3) {//back to Customer member management menu
+            if (updateChoice == 3) {
                 break;
             }
 
@@ -4172,7 +4165,8 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
     cout << "Customer ID  : " << customer_id << endl;
     cout << "Customer Name: " << customer_name << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << left
         << setw(10) << "ID"
@@ -4181,7 +4175,8 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
         << setw(15) << "Unit Price(RM)"
         << setw(15) << "Subtotal(RM)" << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     for (int i = 0; i < bookingCount; i++)
     {
@@ -4224,7 +4219,8 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
     pmtResult result = pmt_process(customer_id, bill_id, payable, history, history_count, "Service");
 
     // summary
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Total Quantity:" << total_qty << endl;
     cout << "Total Price   :   RM" << total_price << endl;
@@ -4232,11 +4228,13 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
     cout << "Tax           :   RM" << tax_amt << endl;
     cout << "Payable       :   RM" << payable << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Change        :   RM" << result.change << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('=') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Exiting to the Payment Menu ...";
     return result;
@@ -4264,7 +4262,8 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
     cout << "Customer ID  : " << customer_id << endl;
     cout << "Customer Name: " << customer_name << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << left
         << setw(10) << "ID"
@@ -4273,7 +4272,8 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
         << setw(15) << "Unit Price(RM)"
         << setw(15) << "Subtotal(RM)" << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
         for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
@@ -4315,7 +4315,8 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
     pmtResult result = pmt_process(customer_id, bill_id, payable, history, history_count, "Appointment");
 
     //summary
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Total Quantity:" << total_qty << endl;
     cout << "Total Price   :   RM" << total_price << endl;
@@ -4323,11 +4324,13 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
     cout << "Tax           :   RM" << tax_amt << endl;
     cout << "Payable       :   RM" << payable << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('-') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Change        :   RM" << result.change << endl;
 
-    cout << setfill('-') << setw(74) << "-" << setfill(' ') << endl;
+    cout << setfill('=') << setw(75) << "-" << endl;
+    cout << setfill(' ') << " ";
 
     cout << "Exiting to the Payment Menu ...";
     return result;
