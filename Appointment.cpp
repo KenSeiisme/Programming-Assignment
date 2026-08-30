@@ -43,6 +43,15 @@ struct Staff {
     string passwordStaff;
     string positionStaff;
 };
+
+// Data structure for Rating details
+struct Rating {
+    string ratingID;
+    string customerID;
+    string staffID;
+    int score;
+    string comment;
+};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Lee Hao Zheng
@@ -98,11 +107,13 @@ int serviceCounter = 1006;
 int bookingCounter = 1001;
 int appointmentCounter = 1001;
 int appointmentServiceCounter = 1003;
+int ratingCounter = 1003;
 
 const int MAX_CUSTOMERS = 100;
 const int MAX_MEMBERS = 100;
 const int MAX_STAFF = 100;
 const int MAX_APPOINTMENT_SERVICES = 100;
+const int MAX_RATINGS = 100;
 
 int customerCount = 4;
 int memberCount = 4;
@@ -155,6 +166,12 @@ Staff staffDB[MAX_STAFF] = {
     {"STF1008", "Lao Teh", "Male", "017-88990012", "laoteh@gmail.com", "c9P5!xT2$w@", "Skincare Specialist"},
     {"STF1009", "Noor Shahirah", "Female", "010-86043225", "shahirah@gmail.com", "k6P3#wT8$mL&", "Skincare Specialist"},
     {"STF1010", "Roslizawati", "Female", "017-88378451", "rosealwaysrosie@gmail.com", "But860//wt=", "Hair Stylist"}
+};
+
+// Global Database Declaration with initial sample ratings
+Rating ratingDB[MAX_RATINGS] = {
+    {"R1001", "C1001", "STF1001", 5, "Great haircut service!"},
+    {"R1002", "M1001", "STF1002", 4, "Friendly staff and clean environment."}
 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Jun Sheng
@@ -209,19 +226,22 @@ void customerPortal();
 void registerCustomer();
 void registerMember();
 void customerMemberLogin();
-void staffPortal();
 void showCustomerMemberUI(const string& userId, const string& accountType);
 void memberCustomerProfile(const string& userId, const string& accountType);
 void viewProfile(const string& userId, const string& accountType);
 void editProfileCMUI(const string& userId, const string& accountType);
+void showStaffListforCM();//show staff id and name at Customer and member UI for rating
+void ratingCM(const string& userId, const string& accountType);
 //Staff area
+void staffPortal();
 void registerStaff();
 void staffLogin();
 void showStaffUI(const string& username);
 void memberManagement();
 void staffManagement();
-void showStaffList();
-void showMemberCustomerList();
+void showStaffList();//show staff info in table
+void showMemberCustomerList();//show customer and member info in table
+void viewRating();//allow staff to view customer and member rating feedback
 void clearInput();
 //Validation
 bool isValidEmail(const string& email);
@@ -338,28 +358,19 @@ bool isValidName(const string& name) {
 }
 
 bool isValidPhoneNumber(const string& phone) {
-    // Find position of the dash
     size_t dashPos = phone.find('-');
 
-    // Dash must exist and be at index 3 (exactly 3 digits before it)
     if (dashPos != 3) return false;
-
-    // Ensure there are no additional dashes
     if (phone.rfind('-') != 3) return false;
 
-    // Verify the first 3 characters are digits
     for (int i = 0; i < 3; ++i) {
         if (!isdigit(phone[i])) return false;
     }
-
-    // Verify there is content after the dash
     if (phone.length() <= 4) return false;
 
-    // Verify all characters after the dash are digits
     for (size_t i = 4; i < phone.length(); ++i) {
         if (!isdigit(phone[i])) return false;
     }
-
     return true;
 }
 
@@ -692,6 +703,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             break;
         case 4:
             cout << "\n-> [Customer UI] Billing module selected.\n";
+            ratingCM(userId, accountType);
             break;
         default:
             cout << RED << "[Error] Invalid selection.\n" << RESET;
@@ -832,6 +844,45 @@ void editProfileCMUI(const string& userId, const string& accountType) {
         }
     }
 }
+void ratingCM(const string& userId, const string& accountType) {
+    if (ratingCount >= MAX_RATINGS) {
+        cout << RED << "[Error] Rating database capacity reached!\n" << RESET;
+        return;
+    }
+
+    cout << "\n========= SUBMIT A RATING =========\n";
+    showStaffListforCM();
+    string staffID;
+    cout << "Enter Staff ID to rate: ";
+    cin >> staffID;
+
+    int stars = 0;
+    while (true) {
+        cout << "Enter rating score (1 to 5 stars): ";
+        if (cin >> stars && stars >= 1 && stars <= 5) {
+            break;
+        }
+        clearInput();
+        cout << RED << "[Error] Invalid input. Enter a whole number from 1 to 5.\n" << RESET;
+    }
+
+    clearInput();
+    string comment;
+    cout << "Enter your review comments (optional, press Enter to skip): ";
+    getline(cin, comment);
+
+    // Save directly into global ratingDB array
+    string ratingGeneratedID = "R" + to_string(ratingCounter++);
+    ratingDB[ratingCount].ratingID = ratingGeneratedID;
+    ratingDB[ratingCount].customerID = userId;
+    ratingDB[ratingCount].staffID = staffID;
+    ratingDB[ratingCount].score = stars;
+    ratingDB[ratingCount].comment = comment.empty() ? "N/A" : comment;
+    ratingCount++; // Increment global counter
+
+    cout << GREEN << "\n[Success] Rating recorded successfully as " << ratingGeneratedID << "!\n" << RESET;
+}
+
 
 void staffPortal() {
     int choice = 0;
@@ -1003,7 +1054,8 @@ void showStaffUI(const string& username) {
         cout << "[ 4 ] Appointment Management\n";
         cout << "[ 5 ] View History\n";
         cout << "[ 6 ] Reporting\n";
-        cout << "[ 7 ] Logout\n";
+        cout << "[ 7 ] View Rating\n"
+        cout << "[ 8 ] Logout\n";
         cout << "Select admin task: ";
 
         if (!(cin >> choice)) {
@@ -1012,7 +1064,7 @@ void showStaffUI(const string& username) {
             continue;
         }
 
-        if (choice == 7) {
+        if (choice == 8) {
             cout << "Logging out of Staff Control Panel...\n";
             SaveScheduleToFile();
             break;
@@ -1066,37 +1118,12 @@ void showStaffUI(const string& username) {
         case 6:
             cout << "\n[System] Reporting module selected.\n";
             break;
+        case 7:
+            viewRating();
+            break;
         default:
             cout << RED << "[Error] Invalid selection.\n" << RESET;
         }
-    }
-}
-
-void showStaffList() {
-    //table staff
-    cout << right << setw(70) << "< TABLE STAFF >" << endl;
-    string border = "+----------+------------------------+----------+----------------+----------------------------+----------------------+----------------------+";
-
-    cout << "\n" << border << "\n";
-    cout << "| " << left << setw(9) << "Staff ID"
-        << "| " << setw(22) << "Name"
-        << " | " << setw(8) << "Gender"
-        << " | " << setw(14) << "Phone number"
-        << " | " << setw(26) << "Email"
-        << " | " << setw(20) << "Password"
-        << " | " << setw(20) << "Position" << " |\n";
-
-    cout << border << "\n";
-
-    for (int i = 0; i < staffCount; ++i) {
-        cout << "| " << left << setw(9) << staffDB[i].idStaff
-            << "| " << setw(22) << staffDB[i].nameStaff
-            << " | " << setw(8) << staffDB[i].genderStaff
-            << " | " << setw(14) << staffDB[i].phoneStaff
-            << " | " << setw(26) << staffDB[i].emailStaff
-            << " | " << setw(20) << staffDB[i].passwordStaff
-            << " | " << setw(20) << staffDB[i].positionStaff << " |\n";
-        cout << border << "\n";
     }
 }
 
@@ -1264,9 +1291,37 @@ void staffManagement() {
         }
     }
 }
+void showStaffList() {
+    //table staff
+    cout << right << setw(70) << "{ TABLE STAFF }" << endl;
+    string border = "+----------+------------------------+----------+----------------+----------------------------+----------------------+----------------------+";
+
+    cout << "\n" << border << "\n";
+    cout << "| " << left << setw(9) << "Staff ID"
+        << "| " << setw(22) << "Name"
+        << " | " << setw(8) << "Gender"
+        << " | " << setw(14) << "Phone number"
+        << " | " << setw(26) << "Email"
+        << " | " << setw(20) << "Password"
+        << " | " << setw(20) << "Position" << " |\n";
+
+    cout << border << "\n";
+
+    for (int i = 0; i < staffCount; ++i) {
+        cout << "| " << left << setw(9) << staffDB[i].idStaff
+            << "| " << setw(22) << staffDB[i].nameStaff
+            << " | " << setw(8) << staffDB[i].genderStaff
+            << " | " << setw(14) << staffDB[i].phoneStaff
+            << " | " << setw(26) << staffDB[i].emailStaff
+            << " | " << setw(20) << staffDB[i].passwordStaff
+            << " | " << setw(20) << staffDB[i].positionStaff << " |\n";
+        cout << border << "\n";
+    }
+}
+
 //show customer and member table
 void showMemberCustomerList() {
-    cout << right << setw(75) << "< TABLE MEMBER & CUSTOMER >" << endl;
+    cout << right << setw(75) << "{ TABLE MEMBER & CUSTOMER }" << endl;
 
     string border = "+----------+------------------------+----------+----------------+----------------------------+----------------------+";
 
@@ -1443,6 +1498,55 @@ void memberManagement() {
         }
     }
 }
+void showStaffListforCM() {
+    cout << right << setw(20) << "\n[ TABLE STAFF ]" << endl;
+    string border = "+----------+------------------------+";
+
+    cout << "\n" << border << "\n";
+    cout << "| " << left << setw(9) << "Staff ID"
+        << "| " << setw(22) << "Name" << " |\n";
+
+    cout << border << "\n";
+
+    for (int i = 0; i < staffCount; ++i) {
+        cout << "| " << left << setw(9) << staffDB[i].idStaff
+            << "| " << setw(22) << staffDB[i].nameStaff << " |\n";
+        cout << border << "\n";
+    }
+
+}
+
+void viewRating() {
+
+    cout << "\n=============================== CUSTOMER FEEDBACK & RATINGS ======================================= \n";
+
+
+    if (ratingCount == 0) {
+        cout << RED << "No customer ratings available in the system yet.\n" << RESET;
+        return;
+    }
+
+    string border = "+------------+------------+----------+-------+---------------------------------------------------------------------------------+";
+
+    cout << border << "\n";
+    cout << "|" << left << setw(12) << "Rating ID"
+        << "|" << setw(12) << "C/M ID"
+        << "|" << setw(10) << "Staff ID"
+        << "|" << setw(7) << "Score"
+        << "|" << setw(80) << "Comments" << " |\n";
+    cout << border << "\n";
+
+    for (int i = 0; i < ratingCount; ++i) {
+        cout << "|" << left << setw(12) << ratingDB[i].ratingID
+            << "|" << setw(12) << ratingDB[i].customerID
+            << "|" << setw(10) << ratingDB[i].staffID
+            << "|" << setw(7) << (to_string(ratingDB[i].score) + "/5")
+            << "|" << setw(80) << ratingDB[i].comment << " |\n";
+        cout << border << "\n";
+    }
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Ng Jun Sheng
