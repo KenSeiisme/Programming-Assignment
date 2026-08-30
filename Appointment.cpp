@@ -4197,7 +4197,7 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
     cout << "Customer Name: " << customer_name << endl;
 
     cout << setfill('-') << setw(75) << "-" << endl;
-    cout << setfill(' ') << " ";
+    cout << setfill(' ');
 
     cout << left
         << setw(10) << "ID"
@@ -4207,12 +4207,12 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
         << setw(15) << "Subtotal(RM)" << endl;
 
     cout << setfill('-') << setw(75) << "-" << endl;
-    cout << setfill(' ') << " ";
+    cout << setfill(' ');
 
     for (int i = 0; i < bookingCount; i++)
     {
         // print and calculation of services
-        if (bookingDB[i].customerID == customer_id && (bookingDB[i].status == "Booked" || bookingDB[i].status == "Completed"))
+        if (bookingDB[i].customerID == customer_id && bookingDB[i].status == "Booked")
         {
 
             int serviceIdx = -1;
@@ -4264,7 +4264,7 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
 
     cout << "Change        :   RM" << result.change << endl;
 
-    cout << setfill('=') << setw(75) << "-" << endl;
+    cout << setfill('=') << setw(75) << "=" << endl;
     cout << setfill(' ') << " ";
 
     cout << "Exiting to the Payment Menu ...";
@@ -4294,7 +4294,7 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
     cout << "Customer Name: " << customer_name << endl;
 
     cout << setfill('-') << setw(75) << "-" << endl;
-    cout << setfill(' ') << " ";
+    cout << setfill(' ');
 
     cout << left
         << setw(10) << "ID"
@@ -4304,7 +4304,7 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
         << setw(15) << "Subtotal(RM)" << endl;
 
     cout << setfill('-') << setw(75) << "-" << endl;
-    cout << setfill(' ') << " ";
+    cout << setfill(' ');
 
     for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
         for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
@@ -4359,7 +4359,7 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
 
     cout << "Change        :   RM" << result.change << endl;
 
-    cout << setfill('=') << setw(75) << "-" << endl;
+    cout << setfill('=') << setw(75) << "=" << endl;
     cout << setfill(' ') << " ";
 
     cout << "Exiting to the Payment Menu ...";
@@ -4608,7 +4608,7 @@ void receipt(int bill_id, int pmt_id, double change, string cust_id,
                 for (int k = 0; k < bookingCount; k++)
                 {
                     if (bookingDB[k].customerID == cust_id &&
-                        (bookingDB[k].status == "Booked" || bookingDB[k].status == "Completed"))
+                        (bookingDB[k].status == "Booked"))
                     {
 
                         int serviceIdx = -1;
@@ -5019,7 +5019,7 @@ void loadService() {
     for (int i = 0; i < bookingCount; i++) {
         const Bookings& booking = bookingDB[i];
 
-        if (booking.status != "Completed" && booking.status != "Booked") {
+        if (booking.status != "Completed") {
             continue;
         }
 
@@ -5141,7 +5141,7 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, in
         int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (weekFilter == 0) || (currentWeek == weekFilter);
 
-        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&
+        if ((bookingReport[i].status == "Completed") &&
             bookingReport[i].month == month &&
             bookingReport[i].year == year && weekMatch)
         {
@@ -5215,7 +5215,7 @@ void RevenueReport(ostream& out) {
         int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&
+        if ((bookingReport[i].status == "Completed") &&
             bookingReport[i].month == targetMonth &&
             bookingReport[i].year == targetYear &&
             weekMatch) {
@@ -5313,7 +5313,7 @@ void StaffReport(ostream& out) {
         int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&
+        if ((bookingReport[i].status == "Completed") &&
             bookingReport[i].month == targetMonth &&
             bookingReport[i].year == targetYear && weekMatch)
         {
