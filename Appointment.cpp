@@ -71,6 +71,8 @@ struct Bookings {
     string date;
     string time;
     string status;//confirm, cancelled, completed
+    //for payment
+    int bill_id;
 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Lee Hao Zheng
@@ -87,6 +89,8 @@ struct Timeslot {
     string service;
     string status;
     double price;
+    //for payment
+    int bill_id;
 };
 
 //Appontment Service
@@ -230,27 +234,27 @@ Services servicesDB[MAX_SERVICES] = {
 };
 
 Bookings bookingDB[MAX_BOOKINGS] = {
-    { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Completed" },
-    { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed" },
-    { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Completed" },
-    { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed" },
-    { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Completed" },
-    { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed" },
-    { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Completed" },
-    { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed" },
-    { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Completed" },
-    { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed" },
+    { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Completed", 0 },
+    { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed", 0 },
+    { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Completed", 0 },
+    { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed", 0 },
+    { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Completed", 0 },
+    { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed", 0 },
+    { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Completed", 0 },
+    { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed", 0 },
+    { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Completed", 0 },
+    { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed", 0 },
 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Hao Zheng
 Timeslot defaultDaySlots[TOTAL_SLOTS] = {
-    {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", "", 0},
-    {2, "11:00 AM - 01:00 PM", "", false, "", "", "", "", "", "", 0},
-    {3, "01:00 PM - 03:00 PM", "", false, "", "", "", "", "", "", 0},
-    {4, "03:00 PM - 05:00 PM", "", false, "", "", "", "", "", "", 0},
-    {5, "05:00 PM - 07:00 PM", "", false, "", "", "", "", "", "", 0},
-    {6, "07:00 PM - 09:00 PM", "", false, "", "", "", "", "", "", 0},
-    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
+    {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", "", 0, 0},
+    {2, "11:00 AM - 01:00 PM", "", false, "", "", "", "", "", "", 0, 0},
+    {3, "01:00 PM - 03:00 PM", "", false, "", "", "", "", "", "", 0, 0},
+    {4, "03:00 PM - 05:00 PM", "", false, "", "", "", "", "", "", 0, 0},
+    {5, "05:00 PM - 07:00 PM", "", false, "", "", "", "", "", "", 0, 0},
+    {6, "07:00 PM - 09:00 PM", "", false, "", "", "", "", "", "", 0, 0},
+    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0, 0}
 };
 
 Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];
@@ -349,6 +353,7 @@ void AppointmentStaff();
 void AppointmentCustomer(const string& currentUserId, const string& currentUserName);
 void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffID = "");
 void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
+void initAppointmentCounter();
 void CreateAppointmentStaff();
 void CreateAppointmentCustomer(const string& customerID, const string& customerName);
 void CancelAppointment(const string& currentUserId = "");
@@ -409,6 +414,7 @@ int main() {
     logo();
     inYearlySchedule();
     LoadScheduleFromFile();
+    initAppointmentCounter();
     mainMenu();
     return 0;
 }
@@ -817,16 +823,15 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
         cout << "============ MEMBER/CUSTOMER PROFILE ============\n";
         cout << "[ 1 ] View your profile\n";
         cout << "[ 2 ] Edit Profile\n";
-        cout << "[ 3 ] Renew membership\n";
-        cout << "[ 4 ] Exit (Return to Main Menu)\n";
-        cout << "Select option (1-4): ";
+        cout << "[ 3 ] Exit (Return to Main Menu)\n";
+        cout << "Select option (1-3): ";
 
         if (!(cin >> choice)) {
             clearInput();
             cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
-        if (choice == 4) {
+        if (choice == 3) {
             cout << "Returning to Dashboard...\n";
             break;
         }
@@ -837,17 +842,6 @@ void memberCustomerProfile(const string& userId, const string& accountType) {
             break;
         case 2:
             editProfileCMUI(userId, accountType);
-            break;
-        case 3:
-            if (accountType == "Customer") {//When login as customer it will give this message
-                cout << RED << "\n[Access Denied] Standard customers cannot renew membership.\n" << RESET;
-                cout << "Please register as a Member first to enjoy membership features.\n";
-            }
-            else {
-                cin.ignore(10000, '\n');
-                payment(userId, history, history_count);
-                cout << "\n[Success] Membership renewed successfully!\n";
-            }
             break;
         default:
             cout << RED << "[Error] Invalid option. Try again.\n" << RESET;
@@ -2932,6 +2926,33 @@ string generateAppointmentID() {
     return newID;
 }
 
+void initAppointmentCounter() {
+    int maxID = 1000;
+
+    
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+
+                string id = schedule[monthIndex][dayIndex][slotIndex].appointmentID;
+
+                //check APT and not cancelled "-"
+                if (!id.empty() && id != "-" && id.substr(0, 3) == "APT") {
+                    //start from APT record whole number
+                    int currentNum = stoi(id.substr(3));
+                    if (currentNum > maxID) {
+                        maxID = currentNum; //record the largest
+                    }
+                }
+
+            }
+        }
+    }
+
+    //+1
+    appointmentCounter = maxID + 1;
+}
+
 void CreateAppointmentStaff() {
 
     cout << "\n==========================================" << endl;
@@ -4257,6 +4278,7 @@ pmtResult pmt_service(string customer_id, int bill_id, histRecord history[], int
             if (bookingDB[i].customerID == customer_id && bookingDB[i].status == "Booked")
             {
                 bookingDB[i].status = "Completed";
+                bookingDB[i].bill_id = bill_id;
             }
         }
     }
@@ -4368,6 +4390,7 @@ pmtResult pmt_appmt(string customer_id, int bill_id, histRecord history[], int& 
                     if (slot.isBooked && (slot.customerName == customer_name || slot.customerName == customer_id)) {
                         if (slot.status == "Pending Payment" || slot.status == "Booked") {
                             slot.status = "Completed";
+                            slot.bill_id = bill_id;
                         }
                     }
                 }
@@ -4639,7 +4662,7 @@ void receipt(int bill_id, int pmt_id, double change, string cust_id,
                 for (int k = 0; k < bookingCount; k++)
                 {
                     if (bookingDB[k].customerID == cust_id &&
-                        (bookingDB[k].status == "Booked"))
+                        (bookingDB[k].bill_id == bill_id))
                     {
 
                         int serviceIdx = -1;
@@ -4697,23 +4720,22 @@ void receipt(int bill_id, int pmt_id, double change, string cust_id,
 
                             const Timeslot& slot = schedule[monthIndex][dayIndex][slotIndex];
 
-                            if (slot.isBooked && (slot.customerName == customer_name || slot.customerName == cust_id)) {
-                                if (slot.status == "Booked" || slot.status == "Pending Payment") {
+                            if (slot.isBooked && (slot.customerName == customer_name || slot.customerName == cust_id)
+                                && slot.bill_id == bill_id) {
 
 
-                                    cout << left
-                                        << setw(10) << slot.appointmentID
-                                        << setw(45) << slot.service
-                                        << setw(12) << 1
-                                        << setw(18) << fixed << setprecision(2) << slot.price
-                                        << setw(15) << slot.price
-                                        << endl;
+                                cout << left
+                                    << setw(10) << slot.appointmentID
+                                    << setw(45) << slot.service
+                                    << setw(12) << 1
+                                    << setw(18) << fixed << setprecision(2) << slot.price
+                                    << setw(15) << slot.price
+                                    << endl;
 
-                                    total_qty += 1;
-                                    total_price += slot.price;
-                                    appointment_price += slot.price;
-                                    appointment_qty += 1;
-                                }
+                                total_qty += 1;
+                                total_price += slot.price;
+                                appointment_price += slot.price;
+                                appointment_qty += 1;
                             }
                         }
                     }
