@@ -676,6 +676,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
         cout << "[ 2 ] Service\n";
         cout << "[ 3 ] Appointment\n";
         cout << "[ 4 ] Billing\n";
+        cout << "[ 5 ] Rating\n";
         cout << "[ 5 ] Logout\n";
         cout << "Select action: ";
 
@@ -684,7 +685,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             cout << RED << "[Error] Invalid input.\n" << RESET;
             continue;
         }
-        if (choice == 5) {
+        if (choice == 6) {
             cout << "Logging out of Customer Dashboard...\n";
             SaveScheduleToFile();
             break;
@@ -703,7 +704,9 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
             break;
         case 4:
             cout << "\n-> [Customer UI] Billing module selected.\n";
-            ratingCM(userId, accountType);
+            break;
+        case 5:
+            ratingCM(userId, accountType)
             break;
         default:
             cout << RED << "[Error] Invalid selection.\n" << RESET;
