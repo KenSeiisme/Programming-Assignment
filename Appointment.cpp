@@ -2150,6 +2150,7 @@ void staffBookingMenu() {
         cout << "Select option: ";
 
         if (!(cin >> choice)) {
+            clearInput();
             cout << "[Error] Invalid input.\n";
             continue;
         }
@@ -2229,6 +2230,7 @@ void addService() {
     cin >> newService.duration;
 
     if (newService.servicename.empty() || newService.price <= 0 || newService.duration <= 0) {
+        clearInput();
         cout << "[Error] Invalid service information.\n";
         return;
     }
