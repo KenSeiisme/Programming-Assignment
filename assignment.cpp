@@ -803,7 +803,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
         case 4:
             cout << "[DEBUG] Entering payment function with userId: " << userId << endl;
             cin.ignore(10000, '\n');
-            payment(userId, history, history_count);
+            PaymentHistory(history, history_count, false, userId);
             cout << "[DEBUG] Exited payment function.\n";
             break;
         case 5:
@@ -1181,7 +1181,7 @@ void showStaffUI(const string& staffID) {
         cout << "[ 2 ] Staff Info Management\n";
         cout << "[ 3 ] Service management\n";
         cout << "[ 4 ] Appointment Management\n";
-        cout << "[ 5 ] View Payment History\n";
+        cout << "[ 5 ] Billing and Payment Process\n";
         cout << "[ 6 ] Reporting\n";
         cout << "[ 7 ] View Rating\n";
         cout << "[ 8 ] Logout\n";
@@ -1240,11 +1240,7 @@ void showStaffUI(const string& staffID) {
             AppointmentStaff();
             break;
         case 5: {
-            string targetCustID;
-            //get customer id
-            cout << "Enter Customer ID to process payment / view receipt: ";
-            cin >> targetCustID;
-            PaymentHistory(history, history_count, true, targetCustID);
+            staffPaymentHistory(history, history_count);;
             break;
         }
         case 6:
