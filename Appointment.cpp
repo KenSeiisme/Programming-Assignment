@@ -768,7 +768,7 @@ void showCustomerMemberUI(const string& userId, const string& accountType) {
         name = customerDB[idx].nameCustomer;
     }
     while (true) {
-        cout << "\n************************************************\n";
+        cout << "\n**************************************************\n";
         cout << "           CUSTOMER/MEMBER DASHBOARD           \n";
         cout << " Welcome: " << name << " (" << accountType << " - " << userId << ")\n";
         cout << "**************************************************\n";
