@@ -2381,6 +2381,7 @@ void staffAddBooking() {
     newBooking.status = "Booked";
 
     if (!validateBooking(newBooking)) {
+        clearInput();
         cout << "[Error] Booking validation failed.\n";
         return;
     }
