@@ -2156,6 +2156,7 @@ void staffBookingMenu() {
         cout << "Select option: ";
 
         if (!(cin >> choice)) {
+            cin.clear();
             cout << "[Error] Invalid input.\n";
             continue;
         }
@@ -2235,6 +2236,8 @@ void addService() {
     cin >> newService.duration;
 
     if (newService.servicename.empty() || newService.price <= 0 || newService.duration <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "[Error] Invalid service information.\n";
         return;
     }
@@ -2385,6 +2388,8 @@ void staffAddBooking() {
     newBooking.status = "Booked";
 
     if (!validateBooking(newBooking)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "[Error] Booking validation failed.\n";
         return;
     }
