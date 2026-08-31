@@ -399,7 +399,6 @@ int generateID();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Reporting - CAI XUAN
 bool isValidDateRange(int month, int year, int week);
-void setupTestData();
 void loadService();
 void loadAppointments();
 void loadDataFromTeamSystem();
@@ -5524,10 +5523,10 @@ void ReportExport() {
     }
 
     if (exportChoice == 1) {
-        RevenueReport(outFile);
+        RevenueReport(targetMonth, targetYear, targetWeek, outFile);
     }
     else {
-        StaffReport(outFile);
+        StaffReport(targetMonth, targetYear, targetWeek, outFile);
     }
 
     outFile.close();
