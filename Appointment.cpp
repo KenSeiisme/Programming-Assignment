@@ -356,6 +356,7 @@ void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
 void initAppointmentCounter();
 void CreateAppointmentStaff();
 void CreateAppointmentCustomer(const string& customerID, const string& customerName);
+void SearchAppointmentByID(const string& currentUserId = "");
 void CancelAppointment(const string& currentUserId = "");
 void RescheduleAppointment(const string& currentUserId = "");
 void ViewStaffSchedule();
@@ -2631,15 +2632,16 @@ void AppointmentStaff() {
         cout << "\nWelcome to the Appointment Scheduler!\n" << endl;
         cout << "Please select an option from the menu below:" << endl;
         cout << "1. View All Appointment" << endl;
-        cout << "2. Create a New Appointment" << endl;
-        cout << "3. Cancel Appointment" << endl;
-        cout << "4. Reschedule Appointment" << endl;
-        cout << "5. View Staff Schedule" << endl;
-        cout << "6. Appointment Marking" << endl;
-        cout << "7. View Appointment Service" << endl;
-        cout << "8. Add Appointment Service" << endl;
-        cout << "9. Edit Appointment Service" << endl;
-        cout << "10. Delete Appointment Service" << endl;
+        cout << "2. Search Appointment" << endl;
+        cout << "3. Create a New Appointment" << endl;
+        cout << "4. Cancel Appointment" << endl;
+        cout << "5. Reschedule Appointment" << endl;
+        cout << "6. View Staff Schedule" << endl;
+        cout << "7. Appointment Marking" << endl;
+        cout << "8. View Appointment Service" << endl;
+        cout << "9. Add Appointment Service" << endl;
+        cout << "10. Edit Appointment Service" << endl;
+        cout << "11. Delete Appointment Service" << endl;
         cout << "0. Exit\n" << endl;
 
         cout << "Select option: ";
@@ -2686,38 +2688,42 @@ void AppointmentStaff() {
             break;
         }
         case 2:
+            cout << "You selected: Search Appointment" << endl;
+            SearchAppointmentByID();
+            break;
+        case 3:
             cout << "You selected: Create a New Appointment" << endl;
             CreateAppointmentStaff();
             break;
-        case 3:
+        case 4:
             cout << "You selected: Cancel Appointment" << endl;
             CancelAppointment();
             break;
-        case 4:
+        case 5:
             cout << "You selected: Reschedule Appointment" << endl;
             RescheduleAppointment();
             break;
-        case 5:
+        case 6:
             cout << "You selected: View Staff Schedule" << endl;
             ViewStaffSchedule();
             break;
-        case 6:
+        case 7:
             cout << "You selected: Appointment Marking" << endl;
             AppointmentMarking();
             break;
-        case 7:
+        case 8:
             cout << "You selected: View Appointment Service" << endl;
             ViewAppointmentServices();
             break;
-        case 8:
+        case 9:
             cout << "You selected: Add Appointment Service" << endl;
             AddAppointmentService();
             break;
-        case 9:
+        case 10:
             cout << "You selected: Edit Appointment Service" << endl;
             EditAppointmentService();
             break;
-        case 10:
+        case 11:
             cout << "You selected: Delete Appointment Service" << endl;
             DeleteAppointmentService();
             break;
@@ -2747,7 +2753,8 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
         cout << "1. Create a New Appointment" << endl;
         cout << "2. Cancel Appointment" << endl;
         cout << "3. Reschedule Appointment" << endl;
-        cout << "4. View Appointment Service" << endl;
+        cout << "4. Search Appointment" << endl;
+        cout << "5. View Appointment Service" << endl;
         cout << "0. Exit\n" << endl;
 
         cout << "Select option: ";
@@ -2777,6 +2784,10 @@ void AppointmentCustomer(const string& currentUserId, const string& currentUserN
             RescheduleAppointment(currentUserId);
             break;
         case 4:
+            cout << "You selected: Search Appointment" << endl;
+            SearchAppointmentByID(currentUserId);
+            break;
+        case 5:
             cout << "You selected: View Appointment Service" << endl;
             ViewAppointmentServices();
             break;
@@ -2904,6 +2915,65 @@ void ViewAllAppointment(const Timeslot schedule[], int size, string filterStaffI
             << "|" << endl;
     }
     cout << separator << endl;
+}
+
+void SearchAppointmentByID(const string& currentUserId) {
+
+    cout << "\n==========================================" << endl;
+    cout << "           SEARCH APPOINTMENT             " << endl;
+    cout << "==========================================\n" << endl;
+
+    string searchID;
+    cout << "Enter Appointment ID to search (e.g., APT1001): ";
+    cin >> searchID;
+
+    if (cin.fail() || searchID.empty()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << RED << "\n[Error] Invalid input!" << RESET << endl;
+        return;
+    }
+
+    int curYear, curMonth, curDay, curHour;
+    getCurrentSystemTime(curYear, curMonth, curDay, curHour);
+
+    bool found = false;
+
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+
+                if (schedule[monthIndex][dayIndex][slotIndex].isBooked && schedule[monthIndex][dayIndex][slotIndex].appointmentID == searchID) {
+                    found = true;
+
+                    if (!currentUserId.empty() && schedule[monthIndex][dayIndex][slotIndex].customerID != currentUserId) {
+                        cout << RED << "\n[Error] You do not have permission to cancel another customer's appointment!" << RESET << endl;
+                        return;
+                    }
+
+                    cout << GREEN << "\n[Success] Appointment found!" << RESET << endl;
+                    cout << "\n------- Appointment Detail -------" << endl;
+                    cout << "Appointment ID: " << YELLOW << schedule[monthIndex][dayIndex][slotIndex].appointmentID << RESET << endl;
+                    cout << "Date        : " << (dayIndex + 1) << "-" << (monthIndex + 1) << "-" << curYear << endl;
+                    cout << "Time Slot   : " << schedule[monthIndex][dayIndex][slotIndex].time << endl;
+                    cout << "Customer    : " << schedule[monthIndex][dayIndex][slotIndex].customerName << " (" << schedule[monthIndex][dayIndex][slotIndex].customerID << ")" << endl;
+                    cout << "Staff       : " << schedule[monthIndex][dayIndex][slotIndex].staffName << " (" << schedule[monthIndex][dayIndex][slotIndex].staffID << ")" << endl;
+                    cout << "Service     : " << schedule[monthIndex][dayIndex][slotIndex].service << endl;
+                    cout << "Price       : RM " << fixed << setprecision(2) << schedule[monthIndex][dayIndex][slotIndex].price << endl;
+                    cout << "Status      : " << schedule[monthIndex][dayIndex][slotIndex].status << endl;
+                    cout << "----------------------------------" << endl;
+
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        if (found) break;
+    }
+
+    if (!found) {
+        cout << RED << "\n[Error] Appointment ID \"" << searchID << "\" not found!" << RESET << endl;
+    }
 }
 
 void getCurrentSystemTime(int& year, int& month, int& day, int& hour) {
@@ -3219,26 +3289,26 @@ void CreateAppointmentCustomer(const string& customerID, const string& customerN
         return;
     }
 
+    //Appointment Service menu
+    for (int i = 0; i < appointmentServiceCount; i++) {
+        cout << (i + 1) << ". " << appointmentServiceDB[i].serviceName
+            << " (RM " << fixed << setprecision(2) << appointmentServiceDB[i].price << ")\n";
+    }
+
     int Appointmentoption;
     cout << "\nEnter a Service:\n";
-    cout << "1. Wedding Event\n";
-    cout << "2. Hair dressing with make up\n";
-    cout << "Select service: ";
     cin >> Appointmentoption;
 
-    switch (Appointmentoption) {
-    case 1:
-        schedule[monthIndex][dayIndex][slotIndex].service = "Wedding Event";
-        schedule[monthIndex][dayIndex][slotIndex].price = 500.00;
-        break;
-    case 2:
-        schedule[monthIndex][dayIndex][slotIndex].service = "Hair dressing with make up";
-        schedule[monthIndex][dayIndex][slotIndex].price = 150.00;
-        break;
-    default:
+    if (cin.fail() || (Appointmentoption < 1 || Appointmentoption > appointmentServiceCount)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << RED << "[Error] Invalid service option. Booking canceled." << RESET << endl;
         return;
     }
+
+    int selectedServiceIdx = Appointmentoption - 1;
+    schedule[monthIndex][dayIndex][slotIndex].service = appointmentServiceDB[selectedServiceIdx].serviceName;
+    schedule[monthIndex][dayIndex][slotIndex].price = appointmentServiceDB[selectedServiceIdx].price;
 
     //intepret data to timeslot
     int selectedIndex = staffOption - 1;
@@ -5426,6 +5496,16 @@ void ReportExport() {
         return;
     }
 
+    int targetMonth, targetYear, targetWeek;
+    cout << "\nEnter MM/YYYY/W (week0 is for Monthly): ";
+    if (!(cin >> targetMonth >> targetYear >> targetWeek) ||
+        !isValidDateRange(targetMonth, targetYear, targetWeek)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "\nInvalid date range! Report export failed!" << endl;      // if invalid,stop the process
+        return;
+    }
+
     ofstream outFile("report_export.txt");
     if (!outFile.is_open()) {
         cout << "--> File output error!" << endl;
@@ -5440,7 +5520,7 @@ void ReportExport() {
     }
 
     outFile.close();
-    cout << "\n--> Report printed successfully!" << endl;
+    cout << "\nReport printed successfully!" << endl;
 }
 
 void reportingMenu() {
